@@ -1,0 +1,16 @@
+# Apple Health exports + personal outputs
+export.xml
+export_cda.xml
+*.zip
+sleep_records.csv
+sleep_index_nightly.csv
+
+# If you keep exports in a folder
+apple_health_export/
+
+# Common
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+.env
