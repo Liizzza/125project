@@ -1,8 +1,8 @@
 import csv
 import xml.etree.ElementTree as ET
 
-INPUT_XML = "export.xml"
-OUT_CSV = "sleep_records.csv"
+INPUT_XML = "data/export.xml"
+OUT_CSV = "data/sleep_records.csv"
 SLEEP_TYPE = "HKCategoryTypeIdentifierSleepAnalysis"
 
 def main():
@@ -23,6 +23,8 @@ def main():
                     "value": elem.attrib.get("value", ""),
                 })
                 elem.clear()
+
+    print(f"Wrote {OUT_CSV}")
 
 if __name__ == "__main__":
     main()
