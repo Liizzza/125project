@@ -2,13 +2,14 @@ import json
 from datetime import datetime
 import pandas as pd
 
-SLEEP_PROFILE = "data/sleep_profile.json"
-SLEEP_NIGHTLY = "data/sleep_index_nightly.csv"
+SLEEP_PROFILE = "data/sleep_profile2.json"
+SLEEP_NIGHTLY = "data/sleep_index_nightly2.csv"
 VIDEO_INDEX   = "data/video_index.csv"
+CONTENT_OUT = "data/tonight_content2.json"
 
-TONIGHT_PLAN = "data/tonight_plan.json"
+TONIGHT_PLAN  = "data/tonight_plan.json"
 
-TOP_N = 10
+TOP_N = 50
 
 # tweak these anytime
 CATEGORY_WEIGHTS = {
@@ -45,11 +46,9 @@ def choose_tonight_context(profile: dict, plan: dict):
     now = datetime.now()
     now_min = minutes_from_midnight(now)
 
-    # use the plan bedtime if present, else profile, else 11:30pm
     target_bedtime_min = plan.get("bedtime_min", profile.get("target_bedtime_min"))
     if target_bedtime_min is None:
         target_bedtime_min = 23 * 60 + 30
-
     target_bedtime_min = int(target_bedtime_min)
 
     mins_until = (target_bedtime_min - now_min) % 1440
@@ -57,7 +56,7 @@ def choose_tonight_context(profile: dict, plan: dict):
         mins_until = 0
 
     return {
-        "now": now,
+        "now_iso": now.isoformat(),   # ✅ JSON safe
         "now_min": now_min,
         "target_bedtime_min": target_bedtime_min,
         "mins_until_bedtime": int(mins_until),
@@ -111,8 +110,12 @@ def score_row(row, ctx, feats, profile):
         intensity_penalty_strength += 0.4
     if drift >= 30:         # drifting later
         intensity_penalty_strength += 0.3
+    # Ideal duration: if far from bed, 20–30 min is fine; if close, shorter is better
     if mins_until <= 30:
-        intensity_penalty_strength += 0.3
+        ideal = min(15, max(5, mins_until))
+    else:
+        ideal = 25
+
 
     intensity_score = 1.0 - (intensity_penalty_strength * intensity)
     intensity_score = max(0.0, intensity_score)
@@ -123,6 +126,10 @@ def score_row(row, ctx, feats, profile):
     # --- final score ---
     score = (2.2 * intensity_score) + (1.3 * duration_fit) + (0.6 * cat_w)
 
+    duration_match = 1.0 - min(1.0, abs(duration - ideal) / max(ideal, 1))
+    duration_match = max(0.0, duration_match)
+
+    score += 0.25 * duration_match  # small tie-breaker
     # small bonus if it exactly "fits" the time window
     if duration <= max(5, mins_until):
         score += 0.2
@@ -164,6 +171,10 @@ def explain(row, dbg):
 def main():
     profile = load_profile(SLEEP_PROFILE)
     plan = load_json(TONIGHT_PLAN)
+    if not plan:
+        raise FileNotFoundError(
+            f"Missing or empty plan file: {TONIGHT_PLAN}. Run make_sleep_plan.py first."
+        )
     nightly = pd.read_csv(SLEEP_NIGHTLY)
     videos = pd.read_csv(VIDEO_INDEX)
 
@@ -177,9 +188,32 @@ def main():
 
     scored.sort(key=lambda x: x[0], reverse=True)
     top = scored[:TOP_N]
+    out = {
+        "generated_at": datetime.now().isoformat(),
+        "context": ctx,
+        "latest_sleep_features": feats,
+        "top_n": TOP_N,
+        "recommendations": [
+            {
+                "rank": i + 1,
+                "score": float(s),
+                "title": str(row["title"]),
+                "url": str(row["url"]),
+                "category": str(row.get("category", "other")),
+                "durationMin": float(row["durationMin"]),
+                "intensity": float(row["intensity"]),
+                "why": dbg,
+                "explain": explain(row, dbg),
+            }
+            for i, (s, dbg, row) in enumerate(top)
+        ],
+    }
+    with open(CONTENT_OUT, "w") as f:
+        json.dump(out, f, indent=2)
+    print(f"\nWrote content → {CONTENT_OUT}")
 
     print("\n=== Context ===")
-    print("Now:", ctx["now"])
+    print("Now:", ctx["now_iso"])
     print("Minutes until target bedtime:", ctx["mins_until_bedtime"])
     print("\n=== Latest sleep features ===")
     print(feats)

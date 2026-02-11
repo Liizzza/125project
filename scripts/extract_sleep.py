@@ -1,8 +1,8 @@
 import csv
 import xml.etree.ElementTree as ET
 
-INPUT_XML = "data/export.xml"
-OUT_CSV = "data/sleep_records.csv"
+INPUT_XML = "data/export2.xml"
+OUT_CSV = "data/sleep_records2.csv"
 SLEEP_TYPE = "HKCategoryTypeIdentifierSleepAnalysis"
 
 def main():

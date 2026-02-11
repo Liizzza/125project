@@ -1,0 +1,1218 @@
+{
+  "generated_at": "2026-02-11T15:35:48.326791",
+  "plan": {
+    "generated_at": "2026-02-11T15:35:47.880189",
+    "now_min": 935,
+    "bedtime_min": 1305,
+    "wake_min": 510,
+    "sleep_opportunity_min": 645,
+    "desired_sleep_min": 660,
+    "debt_min": 1677.5,
+    "constraints": {
+      "must_wake_by_min": 540,
+      "preferred_wake_min": 510,
+      "hard_constraints": {
+        "no_bed_after_min": 1410,
+        "min_sleep_opportunity_min": 420
+      },
+      "soft_constraints": {
+        "avoid_high_intensity_near_bed": true,
+        "caffeine_cutoff_min": 960
+      }
+    },
+    "baseline": {
+      "median_sleep_min": 81.5,
+      "median_bedtime_wrap": 594.0,
+      "median_wake_min": 949.0,
+      "wake_std_min": 410.57849432234025
+    },
+    "score": 4.2542857142857144,
+    "why": {
+      "desired_sleep_min": 660,
+      "sleep_opp_min": 645,
+      "mins_until_bedtime": 370,
+      "sleep_score": 0.98,
+      "wake_score": 1.0,
+      "bedtime_score": 0.95,
+      "target_wake_min": 510,
+      "no_bed_after_min": 1410,
+      "min_sleep_opportunity_min": 420,
+      "caffeine_penalty": 0.036,
+      "caffeine_cutoff_min": 960,
+      "caffeine_window_min": 420,
+      "soft_penalty_total": 0.036
+    }
+  },
+  "content": {
+    "generated_at": "2026-02-11T15:35:48.298949",
+    "context": {
+      "now_iso": "2026-02-11T15:35:48.296401",
+      "now_min": 935,
+      "target_bedtime_min": 1399,
+      "mins_until_bedtime": 464,
+      "planned_wake_min": 450
+    },
+    "latest_sleep_features": {
+      "sleep_debt_7n_min": 1677.5,
+      "bedtime_drift_min": 297.66666666666663,
+      "bedtime_std_7n": 392.3235909297324,
+      "wake_std_7n": 493.7030484005542,
+      "most_recent_sleep_date": "2025-11-10",
+      "most_recent_total_sleep_min": 81.5
+    },
+    "top_n": 50,
+    "recommendations": [
+      {
+        "rank": 1,
+        "score": 4.111200000000001,
+        "title": "Forest Night Sounds , Sleep Ambience",
+        "url": "https://www.youtube.com/watch?v=u0vYWzcAeKE",
+        "category": "nature",
+        "durationMin": 20.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.1
+        },
+        "explain": "nature \u00b7 20 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 2,
+        "score": 4.111200000000001,
+        "title": "Calm Sleep Stories | The Nordland Night Train with Erik Braa",
+        "url": "https://www.youtube.com/watch?v=JcrcXtjRTTE",
+        "category": "nature",
+        "durationMin": 30.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.1
+        },
+        "explain": "nature \u00b7 30 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 3,
+        "score": 4.1112,
+        "title": "20 Minute Guided Meditation Body Scan \ud83c\udf15 ( Relaxation, Anxiety, Stress, Insomnia, Sleep )",
+        "url": "https://www.youtube.com/watch?v=hgT5eAQX88Y",
+        "category": "meditation",
+        "durationMin": 23.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 23 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 4,
+        "score": 4.1012,
+        "title": "20 Minute Restorative Yoga ( BEST Yoga for DEEP SLEEP )",
+        "url": "https://www.youtube.com/watch?v=tZ7SxDjgucA",
+        "category": "meditation",
+        "durationMin": 22.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 22 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 5,
+        "score": 4.091200000000001,
+        "title": "20 minute Evening Yoga Stretch | Bedtime Yoga for Stress & Tension",
+        "url": "https://www.youtube.com/watch?v=6JuhreAD-YY",
+        "category": "meditation",
+        "durationMin": 21.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 21 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 6,
+        "score": 4.081200000000001,
+        "title": "Equal Breathing Exercise for Sleep",
+        "url": "https://www.youtube.com/watch?v=4wEDoKm40Yc",
+        "category": "meditation",
+        "durationMin": 20.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 20 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 7,
+        "score": 4.081200000000001,
+        "title": "ASMR for Instant Tingles & Deep Sleep \ud83d\ude34 100% Guaranteed Relaxation",
+        "url": "https://www.youtube.com/watch?v=2hA4Ff5E4zM",
+        "category": "asmr",
+        "durationMin": 23.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 23 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 8,
+        "score": 4.081200000000001,
+        "title": "Eyes Closed ASMR For Sleep \ud83d\ude34",
+        "url": "https://www.youtube.com/watch?v=piya8xt03JY",
+        "category": "asmr",
+        "durationMin": 27.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 27 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 9,
+        "score": 4.081200000000001,
+        "title": "Bedtime Yoga for Sleep, Anxiety and Stress",
+        "url": "https://www.youtube.com/watch?v=5NhJd1PbXL4",
+        "category": "meditation",
+        "durationMin": 20.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 20 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 10,
+        "score": 4.071200000000001,
+        "title": "Only Click This ASMR When You're Ready To Sleep \ud83d\ude34 (Follow My Instructions)",
+        "url": "https://www.youtube.com/watch?v=3jkO5ZC0pJI",
+        "category": "asmr",
+        "durationMin": 22.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 22 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 11,
+        "score": 4.071200000000001,
+        "title": "ASMR \ud83c\udf3a Sleepy Pleasures \ud83c\udf3a Soft Spoken",
+        "url": "https://www.youtube.com/watch?v=YZFqWIBkss0",
+        "category": "asmr",
+        "durationMin": 28.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 28 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 12,
+        "score": 4.071200000000001,
+        "title": "ASMR sleep clinic ~ soft spoken & whisper (guided meditation, follow instructions, object triggers)",
+        "url": "https://www.youtube.com/watch?v=NzXfEF5odD0",
+        "category": "asmr",
+        "durationMin": 22.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 22 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 13,
+        "score": 4.071200000000001,
+        "title": "15 min Bedtime Yoga in Bed for Better Sleep | Tension relief to fall asleep",
+        "url": "https://www.youtube.com/watch?v=5sKIdUn7lPU",
+        "category": "nature",
+        "durationMin": 16.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.1
+        },
+        "explain": "nature \u00b7 16 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 14,
+        "score": 4.0712,
+        "title": "Calm Sleep Stories | Stephen Fry's 'Blue Gold'",
+        "url": "https://www.youtube.com/watch?v=5mGifCwig8I",
+        "category": "stories",
+        "durationMin": 25.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 0.95
+        },
+        "explain": "stories \u00b7 25 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 15,
+        "score": 4.0712,
+        "title": "Bedtime Yoga | Gentle Yoga With Deep Sleep Music To Relax & Unwind",
+        "url": "https://www.youtube.com/watch?v=txasA5fOtGI",
+        "category": "music",
+        "durationMin": 25.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 0.95
+        },
+        "explain": "music \u00b7 25 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 16,
+        "score": 4.0612,
+        "title": "ASMR Sleep Hypnosis | Soft Spoken Guided Sleep",
+        "url": "https://www.youtube.com/watch?v=-0skIp8SmSc",
+        "category": "asmr",
+        "durationMin": 21.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 21 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 17,
+        "score": 4.0612,
+        "title": "the ULTIMATE Comforting CLOWN Caf\u00e9 \ud83e\udd21 Soft Spoken ASMR for Sleep Relaxation Healing your Coulrophobia",
+        "url": "https://www.youtube.com/watch?v=lZiIkTQGkzQ",
+        "category": "asmr",
+        "durationMin": 21.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 21 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 18,
+        "score": 4.0612,
+        "title": "The SLEEPY Silly Crocodile | Animated Bedtime Story For Kids",
+        "url": "https://www.youtube.com/watch?v=f5IgT5BsL9o",
+        "category": "stories",
+        "durationMin": 24.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 0.95
+        },
+        "explain": "stories \u00b7 24 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 19,
+        "score": 4.0612,
+        "title": "\ud83d\udc2d Milo the Sleepy Mouse \ud83d\udc2d Calming Bedtime Story for Kids with Relaxing Music",
+        "url": "https://www.youtube.com/watch?v=Zu5EOcd-L4U",
+        "category": "stories",
+        "durationMin": 24.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 0.95
+        },
+        "explain": "stories \u00b7 24 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 20,
+        "score": 4.0612,
+        "title": "15 min Bedtime Yoga \u2013 Day #5 (RELAXING YOGA STRETCHES BEFORE BED)",
+        "url": "https://www.youtube.com/watch?v=AZ-o2ak-zW8",
+        "category": "meditation",
+        "durationMin": 18.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 18 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 21,
+        "score": 4.0612,
+        "title": "15 min Evening Yoga \u2013 Day #1 (YOGA FOR FLEXIBILITY AND RELAXATION)",
+        "url": "https://www.youtube.com/watch?v=P295KQMmkh8",
+        "category": "meditation",
+        "durationMin": 18.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 18 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 22,
+        "score": 4.051200000000001,
+        "title": "Guided Meditation for Sleep - Body Scan",
+        "url": "https://www.youtube.com/watch?v=n4F55PPwC-U",
+        "category": "meditation",
+        "durationMin": 17.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 17 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 23,
+        "score": 4.051200000000001,
+        "title": "Guided Body Scan Meditation for Sleep and Relaxation | Dana-Farber Zakim Center Remote Programming",
+        "url": "https://www.youtube.com/watch?v=T5QoAXGSl_k",
+        "category": "meditation",
+        "durationMin": 17.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 17 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 24,
+        "score": 4.051200000000001,
+        "title": "Breathing Routine To Help Fall Asleep I 1 Minute Breath Holds",
+        "url": "https://www.youtube.com/watch?v=jWXkDny18to",
+        "category": "meditation",
+        "durationMin": 17.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 17 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 25,
+        "score": 4.051200000000001,
+        "title": "ASMR Sleep Expert Helps You Relax \u2b50 Soft Spoken ",
+        "url": "https://www.youtube.com/watch?v=1nDsIgzC1wQ",
+        "category": "asmr",
+        "durationMin": 30.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 30 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 26,
+        "score": 4.051200000000001,
+        "title": "ASMR Russian Teacher Home Visit \ud83d\udcda Soft Spoken Comfort for a Sick Student",
+        "url": "https://www.youtube.com/watch?v=bzuCdAgz4N8",
+        "category": "asmr",
+        "durationMin": 20.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 20 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 27,
+        "score": 4.051200000000001,
+        "title": "ASMR Sleep Clinic \ud83d\udca4 Soft Spoken Personal Attention ",
+        "url": "https://www.youtube.com/watch?v=HTIUG98k1Hw",
+        "category": "asmr",
+        "durationMin": 30.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 30 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 28,
+        "score": 4.051200000000001,
+        "title": "Calm Sleep Stories | Jerome Flynn's 'Sacred New Zealand'",
+        "url": "https://www.youtube.com/watch?v=O4x9ssJ0jfM",
+        "category": "stories",
+        "durationMin": 27.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 0.95
+        },
+        "explain": "stories \u00b7 27 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 29,
+        "score": 4.051200000000001,
+        "title": "15 min Gentle Bedtime Yoga for Beginners - Evening Yoga Stretch",
+        "url": "https://www.youtube.com/watch?v=xen33SvMdJ0",
+        "category": "meditation",
+        "durationMin": 17.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 17 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 30,
+        "score": 4.041200000000001,
+        "title": "4-7-8 Calm Breathing Exercise | 15 Minutes of Deep Relaxation | Anxiety Relief | Pranayama Exercise",
+        "url": "https://www.youtube.com/watch?v=lEzaFx8k7Ew",
+        "category": "meditation",
+        "durationMin": 16.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 16 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 31,
+        "score": 4.041200000000001,
+        "title": "15 Minute Gentle Yoga for Deep Sleep - SLEEP THROUGHOUT THE NIGHT!",
+        "url": "https://www.youtube.com/watch?v=1zINEDWwixo",
+        "category": "meditation",
+        "durationMin": 16.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 16 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 32,
+        "score": 4.041200000000001,
+        "title": "Bedtime Yoga for a Deep Sleep, Stress and Anxiety",
+        "url": "https://www.youtube.com/watch?v=SrkTBWfZc3Q",
+        "category": "meditation",
+        "durationMin": 16.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 16 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 33,
+        "score": 4.031200000000001,
+        "title": "Manipulating The Non-Subscribers (Hypnosis) | Soft Spoken ASMR",
+        "url": "https://www.youtube.com/watch?v=xy5YTYwpXco",
+        "category": "asmr",
+        "durationMin": 18.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.0
+        },
+        "explain": "asmr \u00b7 18 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 34,
+        "score": 4.0212,
+        "title": "Guided Breathing Exercise for Better Sleep",
+        "url": "https://www.youtube.com/watch?v=qfKAipubsjY",
+        "category": "meditation",
+        "durationMin": 14.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 14 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 35,
+        "score": 4.0212,
+        "title": "3 breathing exercises for better health with James Nestor | BBC Maestro",
+        "url": "https://www.youtube.com/watch?v=8qOMTqedPrk",
+        "category": "meditation",
+        "durationMin": 14.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 14 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 36,
+        "score": 4.0212,
+        "title": "\ud83d\udc24The Very Sleepy Duckling\ud83d\udc24The CUTEST Story for Sleep \ud83d\udca4\ud83d\udca4\ud83d\udca4",
+        "url": "https://www.youtube.com/watch?v=fmZ54EaTlEk",
+        "category": "stories",
+        "durationMin": 20.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 0.95
+        },
+        "explain": "stories \u00b7 20 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 37,
+        "score": 4.0212,
+        "title": "The Cat's New Pyjamas \ud83d\udc31\ud83d\udca4The COZIEST Sleepy Story \ud83d\udca4 Non-Stimulating CUTE Story for Kids",
+        "url": "https://www.youtube.com/watch?v=sDdfhvWXnvg",
+        "category": "stories",
+        "durationMin": 30.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 0.95
+        },
+        "explain": "stories \u00b7 30 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 38,
+        "score": 4.0112000000000005,
+        "title": "10 Min Guided Meditation For Sleep & Relaxation | Fall Asleep Fast With Soothing Rain Sounds",
+        "url": "https://www.youtube.com/watch?v=bG3AcN-XOrw",
+        "category": "meditation",
+        "durationMin": 13.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 13 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 39,
+        "score": 4.0112000000000005,
+        "title": "10 min Evening Yoga Stretch - Bedtime Yoga for Beginners",
+        "url": "https://www.youtube.com/watch?v=TUFj6P_FdhU",
+        "category": "meditation",
+        "durationMin": 13.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 13 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 40,
+        "score": 4.0112000000000005,
+        "title": "10 Minute Evening Yoga for Better Sleep",
+        "url": "https://www.youtube.com/watch?v=5Kfv13sGbZQ",
+        "category": "meditation",
+        "durationMin": 13.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 13 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 41,
+        "score": 4.0112000000000005,
+        "title": "10 minute Bedtime Yoga IN BED | Relaxing Bedtime Yoga Routine",
+        "url": "https://www.youtube.com/watch?v=QKqnhbrV6ms",
+        "category": "nature",
+        "durationMin": 10.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.1
+        },
+        "explain": "nature \u00b7 10 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 42,
+        "score": 4.0112000000000005,
+        "title": "10 min Yoga IN BED - Bedtime Yoga Stretch for SLEEP",
+        "url": "https://www.youtube.com/watch?v=cRo0ss2Kc3o",
+        "category": "meditation",
+        "durationMin": 13.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 13 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 43,
+        "score": 4.0112000000000005,
+        "title": "10 Min Evening Yoga Stretch l Melt Stress, Sleep Deep",
+        "url": "https://www.youtube.com/watch?v=y0fms_yJwR0",
+        "category": "meditation",
+        "durationMin": 13.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 13 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 44,
+        "score": 4.0112000000000005,
+        "title": "Evening Yoga in Bed - Supine Yoga Sequence",
+        "url": "https://www.youtube.com/watch?v=Cu7ysrSDyUA",
+        "category": "meditation",
+        "durationMin": 13.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 13 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 45,
+        "score": 4.001200000000001,
+        "title": "10 Minute Sleep Meditation with Positive Messages",
+        "url": "https://www.youtube.com/watch?v=VHDf8c5vJLg",
+        "category": "meditation",
+        "durationMin": 12.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 46,
+        "score": 4.001200000000001,
+        "title": "A Healing Sleep Guided Meditation",
+        "url": "https://www.youtube.com/watch?v=W4ujD0NI0m8",
+        "category": "meditation",
+        "durationMin": 12.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 47,
+        "score": 4.001200000000001,
+        "title": "Sleep Meditation, A Time For Rest and Healing",
+        "url": "https://www.youtube.com/watch?v=yU4LxOcY5w8",
+        "category": "meditation",
+        "durationMin": 12.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 48,
+        "score": 4.001200000000001,
+        "title": "Fall Asleep in Under 10 Minutes (Sleep Meditation Talk-Down)",
+        "url": "https://www.youtube.com/watch?v=49SKdW0w4KM",
+        "category": "meditation",
+        "durationMin": 12.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 49,
+        "score": 4.001200000000001,
+        "title": "Short Sleep Meditation: Fall Deeply Asleep in 10 Minutes",
+        "url": "https://www.youtube.com/watch?v=WnUlGlUGV7E",
+        "category": "meditation",
+        "durationMin": 12.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      },
+      {
+        "rank": 50,
+        "score": 4.001200000000001,
+        "title": "Sleep... 10 Minute  Guided Meditation",
+        "url": "https://www.youtube.com/watch?v=mcirj0OmRHE",
+        "category": "meditation",
+        "durationMin": 12.0,
+        "intensity": 0.12,
+        "why": {
+          "mins_until_bedtime": 464,
+          "duration_fit": 1.0,
+          "intensity_score": 0.8,
+          "sleep_debt_7n_min": 1677.5,
+          "bedtime_drift_min": 297.7,
+          "category_weight": 1.05
+        },
+        "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+      }
+    ]
+  },
+  "stages": {
+    "now_iso": "2026-02-11T15:35:48.326755",
+    "now_min": 935,
+    "bedtime_min": 1305,
+    "wake_min": 510,
+    "mins_until_bedtime": 370,
+    "stage_a": {
+      "label": "Stage A (now \u2192 45 min before bed)",
+      "window": {
+        "start_min": 935,
+        "end_min": 1260
+      },
+      "recommendations": [
+        {
+          "rank": 1,
+          "score": 4.111200000000001,
+          "title": "Forest Night Sounds , Sleep Ambience",
+          "url": "https://www.youtube.com/watch?v=u0vYWzcAeKE",
+          "category": "nature",
+          "durationMin": 20.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.1
+          },
+          "explain": "nature \u00b7 20 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 2,
+          "score": 4.111200000000001,
+          "title": "Calm Sleep Stories | The Nordland Night Train with Erik Braa",
+          "url": "https://www.youtube.com/watch?v=JcrcXtjRTTE",
+          "category": "nature",
+          "durationMin": 30.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.1
+          },
+          "explain": "nature \u00b7 30 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 3,
+          "score": 4.1112,
+          "title": "20 Minute Guided Meditation Body Scan \ud83c\udf15 ( Relaxation, Anxiety, Stress, Insomnia, Sleep )",
+          "url": "https://www.youtube.com/watch?v=hgT5eAQX88Y",
+          "category": "meditation",
+          "durationMin": 23.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 23 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 4,
+          "score": 4.1012,
+          "title": "20 Minute Restorative Yoga ( BEST Yoga for DEEP SLEEP )",
+          "url": "https://www.youtube.com/watch?v=tZ7SxDjgucA",
+          "category": "meditation",
+          "durationMin": 22.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 22 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 5,
+          "score": 4.091200000000001,
+          "title": "20 minute Evening Yoga Stretch | Bedtime Yoga for Stress & Tension",
+          "url": "https://www.youtube.com/watch?v=6JuhreAD-YY",
+          "category": "meditation",
+          "durationMin": 21.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 21 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 6,
+          "score": 4.081200000000001,
+          "title": "Equal Breathing Exercise for Sleep",
+          "url": "https://www.youtube.com/watch?v=4wEDoKm40Yc",
+          "category": "meditation",
+          "durationMin": 20.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 20 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 7,
+          "score": 4.081200000000001,
+          "title": "ASMR for Instant Tingles & Deep Sleep \ud83d\ude34 100% Guaranteed Relaxation",
+          "url": "https://www.youtube.com/watch?v=2hA4Ff5E4zM",
+          "category": "asmr",
+          "durationMin": 23.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.0
+          },
+          "explain": "asmr \u00b7 23 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        }
+      ]
+    },
+    "stage_b": {
+      "label": "Stage B (last 45 min before bed)",
+      "window": {
+        "start_min": 1260,
+        "end_min": 1305
+      },
+      "filters": {
+        "strict": {
+          "max_duration_min": 12,
+          "max_intensity": 0.18
+        },
+        "fallback": {
+          "max_duration_min": 15,
+          "max_intensity": 0.25
+        }
+      },
+      "recommendations": [
+        {
+          "rank": 41,
+          "score": 4.0112000000000005,
+          "title": "10 minute Bedtime Yoga IN BED | Relaxing Bedtime Yoga Routine",
+          "url": "https://www.youtube.com/watch?v=QKqnhbrV6ms",
+          "category": "nature",
+          "durationMin": 10.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.1
+          },
+          "explain": "nature \u00b7 10 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 45,
+          "score": 4.001200000000001,
+          "title": "10 Minute Sleep Meditation with Positive Messages",
+          "url": "https://www.youtube.com/watch?v=VHDf8c5vJLg",
+          "category": "meditation",
+          "durationMin": 12.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 46,
+          "score": 4.001200000000001,
+          "title": "A Healing Sleep Guided Meditation",
+          "url": "https://www.youtube.com/watch?v=W4ujD0NI0m8",
+          "category": "meditation",
+          "durationMin": 12.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 47,
+          "score": 4.001200000000001,
+          "title": "Sleep Meditation, A Time For Rest and Healing",
+          "url": "https://www.youtube.com/watch?v=yU4LxOcY5w8",
+          "category": "meditation",
+          "durationMin": 12.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        },
+        {
+          "rank": 48,
+          "score": 4.001200000000001,
+          "title": "Fall Asleep in Under 10 Minutes (Sleep Meditation Talk-Down)",
+          "url": "https://www.youtube.com/watch?v=49SKdW0w4KM",
+          "category": "meditation",
+          "durationMin": 12.0,
+          "intensity": 0.12,
+          "why": {
+            "mins_until_bedtime": 464,
+            "duration_fit": 1.0,
+            "intensity_score": 0.8,
+            "sleep_debt_7n_min": 1677.5,
+            "bedtime_drift_min": 297.7,
+            "category_weight": 1.05
+          },
+          "explain": "meditation \u00b7 12 min \u00b7 intensity 0.12 | high sleep debt (~1677 min) \u2192 lower intensity | bedtime drifting later \u2192 avoid stimulating content"
+        }
+      ]
+    }
+  }
+}

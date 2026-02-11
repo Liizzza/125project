@@ -1,5 +1,6 @@
 {
-  "generated_at": "2026-02-09T17:56:39.968321",
+  "generated_at": "2026-02-11T15:34:28.918452",
+  "now_min": 934,
   "bedtime_min": 1399,
   "wake_min": 450,
   "sleep_opportunity_min": 491,
@@ -7,7 +8,15 @@
   "debt_min": 920.5,
   "constraints": {
     "must_wake_by_min": 450,
-    "preferred_wake_min": 480
+    "preferred_wake_min": 480,
+    "hard_constraints": {
+      "no_bed_after_min": 1410,
+      "min_sleep_opportunity_min": 420
+    },
+    "soft_constraints": {
+      "avoid_high_intensity_near_bed": true,
+      "caffeine_cutoff_min": 1020
+    }
   },
   "baseline": {
     "median_sleep_min": 436.0,
@@ -15,14 +24,20 @@
     "median_wake_min": 484.0,
     "wake_std_min": 90.61891913804273
   },
-  "score": 3.321254773595199,
+  "score": 3.3017309640713894,
   "why": {
     "desired_sleep_min": 611,
     "sleep_opp_min": 491,
-    "mins_until_bedtime": 323,
+    "mins_until_bedtime": 465,
     "sleep_score": 0.8,
     "wake_score": 0.75,
     "bedtime_score": 0.67,
-    "target_wake_min": 480
+    "target_wake_min": 480,
+    "no_bed_after_min": 1410,
+    "min_sleep_opportunity_min": 420,
+    "caffeine_penalty": 0.02,
+    "caffeine_cutoff_min": 1020,
+    "caffeine_window_min": 420,
+    "soft_penalty_total": 0.02
   }
 }

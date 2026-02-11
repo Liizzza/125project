@@ -1,12 +1,12 @@
 {
-  "must_wake_by_min": 450,
-  "preferred_wake_min": 480,
+  "must_wake_by_min": 540,
+  "preferred_wake_min": 510,
   "hard_constraints": {
     "no_bed_after_min": 1410,
     "min_sleep_opportunity_min": 420
   },
   "soft_constraints": {
     "avoid_high_intensity_near_bed": true,
-    "caffeine_cutoff_min": 1020
+    "caffeine_cutoff_min": 960
   }
 }
