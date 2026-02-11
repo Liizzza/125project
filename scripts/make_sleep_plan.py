@@ -2,13 +2,24 @@ import json
 from datetime import datetime
 import pandas as pd
 
-SLEEP_PROFILE = "data/sleep_profile.json"
-SLEEP_NIGHTLY = "data/sleep_index_nightly.csv"
-CONSTRAINTS   = "data/tomorrow_constraints.json"   # optional
-PLAN_OUT      = "data/tonight_plan.json"           # <-- NEW OUTPUT FILE
+# --------- Pick which user by editing these 4 paths ----------
+SLEEP_PROFILE = "data/sleep_profile2.json"
+SLEEP_NIGHTLY = "data/sleep_index_nightly2.csv"
+CONSTRAINTS   = "data/tomorrow_constraints2.json"   # optional
+PLAN_OUT      = "data/tonight_plan2.json"
+# ------------------------------------------------------------
 
 TOP_K = 5
 TARGET_MIN_DEFAULT = 480  # 8h
+
+# ----------------- soft-constraint tuning -----------------
+SOFT_WEIGHTS = {
+    "late_bed_penalty_max": 0.35,     # max score penalty for being "too close" to a bedtime cap
+    "late_bed_window_min": 60,        # minutes before cap that triggers late-bed penalty
+    "caffeine_penalty_max": 0.20,     # max penalty if bedtime is too soon after caffeine cutoff
+    "caffeine_window_min": 420,       # 4 hours after cutoff is the "risk window"
+}
+# -----------------------------------------------------------
 
 # ----------------- IO helpers -----------------
 
@@ -17,6 +28,8 @@ def load_json(path):
         with open(path, "r") as f:
             return json.load(f)
     except FileNotFoundError:
+        return {}
+    except json.JSONDecodeError:
         return {}
 
 def minutes_from_midnight(dt: datetime) -> int:
@@ -44,6 +57,59 @@ def circ_dist(a, b, period=1440):
 def to_min_of_day(series_dt) -> pd.Series:
     dt = pd.to_datetime(series_dt, errors="coerce")
     return (dt.dt.hour * 60 + dt.dt.minute).astype("float")
+
+def clamp_minute(x):
+    if x is None:
+        return None
+    try:
+        x = int(round(float(x)))
+    except Exception:
+        return None
+    return max(0, min(1439, x))
+
+# ----------------- constraints parsing -----------------
+
+def normalize_constraints(constraints_in: dict, baseline: dict) -> dict:
+    if constraints_in is None:
+        constraints_in = {}
+
+    must = clamp_minute(constraints_in.get("must_wake_by_min"))
+    pref = clamp_minute(constraints_in.get("preferred_wake_min"))
+
+    if pref is None:
+        pref = clamp_minute(baseline.get("median_wake_min"))
+    if pref is None:
+        pref = 480
+    if must is None:
+        must = pref
+
+    hard = constraints_in.get("hard_constraints", {}) or {}
+    soft = constraints_in.get("soft_constraints", {}) or {}
+
+    no_bed_after = clamp_minute(hard.get("no_bed_after_min"))
+    min_opp = hard.get("min_sleep_opportunity_min", None)
+    try:
+        min_opp = int(round(float(min_opp))) if min_opp is not None else None
+    except Exception:
+        min_opp = None
+
+    # normalize known soft keys
+    avoid_high = bool(soft.get("avoid_high_intensity_near_bed", False))
+    caffeine_cutoff = clamp_minute(soft.get("caffeine_cutoff_min"))
+
+    soft_norm = dict(soft)
+    soft_norm["avoid_high_intensity_near_bed"] = avoid_high
+    soft_norm["caffeine_cutoff_min"] = caffeine_cutoff
+
+    return {
+        "must_wake_by_min": int(must),
+        "preferred_wake_min": int(pref),
+        "hard_constraints": {
+            "no_bed_after_min": no_bed_after,
+            "min_sleep_opportunity_min": min_opp,
+        },
+        "soft_constraints": soft_norm,
+    }
 
 # ----------------- data selection -----------------
 
@@ -73,29 +139,18 @@ def estimate_sleep_debt(df_recent: pd.DataFrame, target_min: int) -> float:
 
 # ----------------- candidate generation -----------------
 
-def generate_wake_candidates(constraints_in, baseline):
-    must = constraints_in.get("must_wake_by_min", None)
-    pref = constraints_in.get("preferred_wake_min", None)
-
-    if pref is None:
-        pref = int(round(baseline["median_wake_min"]))
-    if must is None:
-        must = int(pref)
-
-    pref = int(pref)
-    must = int(must)
+def generate_wake_candidates(constraints: dict):
+    must = int(constraints["must_wake_by_min"])
+    pref = int(constraints["preferred_wake_min"])
 
     candidates = []
     for delta in range(-120, 61, 15):
         w = pref + delta
-        if w <= must:
+        if 0 <= w <= must:
             candidates.append(w)
 
-    if must not in candidates:
-        candidates.append(must)
-
-    candidates = [(c % 1440) for c in candidates]
-    return sorted(set(candidates)), {"must_wake_by_min": must, "preferred_wake_min": pref}
+    candidates.append(must)
+    return sorted(set(candidates))
 
 def generate_bed_candidates(now_min, wake_min, desired_sleep_min):
     ideal_bed = (wake_min - desired_sleep_min) % 1440
@@ -127,11 +182,68 @@ def bedtime_score(bed_wrap, baseline_bed_wrap, mins_until_bed):
 
     return closeness * realism
 
+def soft_penalties(bed_min: int, constraints: dict, baseline: dict):
+    """
+    Returns (penalty_total, details_dict)
+    penalty_total is subtracted from the plan score.
+    """
+    soft = (constraints.get("soft_constraints") or {})
+    hard = (constraints.get("hard_constraints") or {})
+
+    penalty = 0.0
+    details = {}
+
+    # Helper: interpret baseline wrapped bedtime back onto clock minutes
+    baseline_bed_clock = int((baseline["median_bedtime_wrap"] + 720) % 1440)
+
+    # ---- Soft: avoid_high_intensity_near_bed ----
+    # Re-interpret as: "avoid late bedtimes vs your typical bedtime"
+    if soft.get("avoid_high_intensity_near_bed", False):
+        # Soft anchor = baseline bedtime; if you have a hard cap, don't anchor later than it
+        cap_hard = hard.get("no_bed_after_min")
+        cap_soft = baseline_bed_clock
+
+        if cap_hard is not None:
+            cap_soft = min(int(cap_soft), int(cap_hard))
+
+        window = int(SOFT_WEIGHTS["late_bed_window_min"])
+
+        # Penalize being LATER than the soft anchor, up to window minutes
+        # Example: anchor 10:00pm, window 120 → 10:30pm gets some penalty
+        dt_late = (bed_min - cap_soft)
+
+        if 0 < dt_late <= window:
+            frac = dt_late / max(1, window)   # later => bigger penalty
+            p = SOFT_WEIGHTS["late_bed_penalty_max"] * frac
+            penalty += p
+            details["late_bed_penalty"] = round(p, 3)
+            details["late_bed_anchor_min"] = int(cap_soft)
+            details["late_bed_window_min"] = int(window)
+
+    # ---- Soft: caffeine_cutoff_min ----
+    # Interpret as: "if bedtime is within X hours after cutoff, penalize"
+    cutoff = soft.get("caffeine_cutoff_min", None)
+    if cutoff is not None:
+        window = int(SOFT_WEIGHTS["caffeine_window_min"])
+        dt = bed_min - int(cutoff)
+
+        if 0 <= dt <= window:
+            frac = 1.0 - (dt / max(1, window))  # closer to cutoff => bigger penalty
+            p = SOFT_WEIGHTS["caffeine_penalty_max"] * frac
+            penalty += p
+            details["caffeine_penalty"] = round(p, 3)
+            details["caffeine_cutoff_min"] = int(cutoff)
+            details["caffeine_window_min"] = int(window)
+
+    details["soft_penalty_total"] = round(penalty, 3)
+    return penalty, details
+
+
 def score_plan(now_min, bed_min, wake_min, baseline, constraints, desired_sleep_min):
     must = int(constraints["must_wake_by_min"])
-    pref = constraints.get("preferred_wake_min", None)
-    target_wake = int(pref) if pref is not None else int(round(baseline["median_wake_min"]))
+    target_wake = int(constraints["preferred_wake_min"])
 
+    # ---------- HARD constraints (filtering) ----------
     if wake_min > must:
         return None
 
@@ -139,7 +251,17 @@ def score_plan(now_min, bed_min, wake_min, baseline, constraints, desired_sleep_
     if mins_until_bed > 12 * 60:
         return None
 
+    no_bed_after = constraints.get("hard_constraints", {}).get("no_bed_after_min")
+    if no_bed_after is not None and bed_min > int(no_bed_after):
+        return None
+
     sleep_opp = (wake_min - bed_min) % 1440
+
+    min_opp = constraints.get("hard_constraints", {}).get("min_sleep_opportunity_min")
+    if min_opp is not None and sleep_opp < int(min_opp):
+        return None
+
+    # ---------- Base score components ----------
     sleep_score = min(1.0, sleep_opp / max(1, desired_sleep_min))
 
     wake_d = circ_dist(wake_min, target_wake)
@@ -150,6 +272,10 @@ def score_plan(now_min, bed_min, wake_min, baseline, constraints, desired_sleep_
 
     score = 2.2 * sleep_score + 1.0 * wake_score + 1.2 * bt_score
 
+    # ---------- SOFT constraints (penalties) ----------
+    penalty, soft_dbg = soft_penalties(bed_min, constraints, baseline)
+    score = score - penalty
+
     why = {
         "desired_sleep_min": int(desired_sleep_min),
         "sleep_opp_min": int(sleep_opp),
@@ -158,6 +284,9 @@ def score_plan(now_min, bed_min, wake_min, baseline, constraints, desired_sleep_
         "wake_score": round(wake_score, 2),
         "bedtime_score": round(bt_score, 2),
         "target_wake_min": int(target_wake),
+        "no_bed_after_min": int(no_bed_after) if no_bed_after is not None else None,
+        "min_sleep_opportunity_min": int(min_opp) if min_opp is not None else None,
+        **soft_dbg,  # includes soft_penalty_total + any triggered penalties
     }
     return score, why
 
@@ -184,8 +313,10 @@ def main():
     baseline = infer_baseline(recent)
     debt = estimate_sleep_debt(recent, target_min)
 
-    wake_candidates, constraints = generate_wake_candidates(constraints_in, baseline)
+    constraints = normalize_constraints(constraints_in, baseline)
     desired_sleep_min = desired_sleep_from_debt(target_min, debt)
+
+    wake_candidates = generate_wake_candidates(constraints)
 
     plans = []
     for w in wake_candidates:
@@ -213,10 +344,14 @@ def main():
         print(f"   Sleep opportunity: {p['sleep_opportunity_min']} min")
         print("   Why:", dbg)
 
-    # ---- THIS IS THE WHOLE POINT OF STEP 1 ----
+    if not top:
+        print("\nNo feasible plans found. Loosen constraints (min opp / no bed after) or widen candidate windows.")
+        return
+
     best_score, best_dbg, best_plan = top[0]
     payload = {
         "generated_at": now.isoformat(),
+        "now_min": int(now_min),
         "bedtime_min": int(best_plan["bedtime_min"]),
         "wake_min": int(best_plan["wake_min"]),
         "sleep_opportunity_min": int(best_plan["sleep_opportunity_min"]),

@@ -1,0 +1,14 @@
+{
+  "n_nights": 5,
+  "avg_total_sleep_min": 144.5,
+  "recent_sleep_debt_7n_min": 1387.0,
+  "avg_onset_latency_min": 0.0,
+  "bedtime_std_7n_min": 340.83549788210104,
+  "bedtime_drift_min": 297.66666666666663,
+  "last_night": {
+    "sleep_date": "2025-11-10",
+    "bedtime": "2025-11-11 03:38:42-08:00",
+    "wake_time": "2025-11-11 05:00:12-08:00",
+    "total_sleep_min": 81.5
+  }
+}

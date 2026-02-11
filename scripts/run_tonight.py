@@ -1,0 +1,143 @@
+import json
+import subprocess
+from pathlib import Path
+from datetime import datetime
+
+# ---- pick user by these 3 paths ----
+MAKE_SLEEP_PLAN_SCRIPT = "scripts/make_sleep_plan.py"
+RECOMMEND_CONTENT_SCRIPT = "scripts/recommend_content.py"
+
+PLAN_JSON = Path("data/tonight_plan2.json")
+CONTENT_JSON = Path("data/tonight_content2.json")
+BUNDLE_OUT = Path("data/tonight_bundle2.json")
+# -----------------------------------
+
+STAGE_B_MIN = 45                 # last 45 minutes before bed
+STAGE_B_MAX_DURATION = 12        # minutes
+STAGE_B_MAX_INTENSITY = 0.18     # keep very gentle
+
+def fmt_time(mins: int) -> str:
+    mins = int(mins) % 1440
+    h = mins // 60
+    m = mins % 60
+    ampm = "AM" if h < 12 else "PM"
+    h12 = h % 12 or 12
+    return f"{h12}:{m:02d} {ampm}"
+
+def minutes_from_midnight(dt: datetime) -> int:
+    return dt.hour * 60 + dt.minute
+
+def minutes_until(now_min: int, t_min: int) -> int:
+    return int((t_min - now_min) % 1440)
+
+def build_stages(plan: dict, content: dict) -> dict:
+    now = datetime.now()
+    now_min = minutes_from_midnight(now)
+
+    bed = int(plan["bedtime_min"])
+    wake = int(plan["wake_min"])
+    until_bed = minutes_until(now_min, bed)
+
+    stage_b_start_min = (bed - STAGE_B_MIN) % 1440
+
+    recs = content.get("recommendations", []) or []
+
+    # --- Stage B: build from all recs using a strict filter, but ALSO allow fallback ---
+    strict_b = []
+    soft_b = []
+
+    for r in recs:
+        try:
+            dur = float(r.get("durationMin", 10))
+            inten = float(r.get("intensity", 1))
+        except Exception:
+            continue
+
+        if dur <= STAGE_B_MAX_DURATION and inten <= STAGE_B_MAX_INTENSITY:
+            strict_b.append(r)
+        # fallback bucket: short OR gentle (so you still get something)
+        if dur <= 15 and inten <= 0.25:
+            soft_b.append(r)
+
+    stage_b = strict_b[:5]
+    if len(stage_b) < 3:
+        # backfill with soft candidates not already included
+        used = {x.get("url") for x in stage_b if x.get("url")}
+        for r in soft_b:
+            if r.get("url") not in used:
+                stage_b.append(r)
+                used.add(r.get("url"))
+            if len(stage_b) >= 5:
+                break
+
+    # --- Stage A: everything else (minus stage_b urls) ---
+    stage_b_urls = {r.get("url") for r in stage_b if r.get("url")}
+    stage_a = [r for r in recs if r.get("url") not in stage_b_urls][:7]
+
+    return {
+        "now_iso": now.isoformat(),
+        "now_min": now_min,
+        "bedtime_min": bed,
+        "wake_min": wake,
+        "mins_until_bedtime": until_bed,
+        "stage_a": {
+            "label": "Stage A (now → 45 min before bed)",
+            "window": {"start_min": now_min, "end_min": stage_b_start_min},
+            "recommendations": stage_a,
+        },
+        "stage_b": {
+            "label": f"Stage B (last {STAGE_B_MIN} min before bed)",
+            "window": {"start_min": stage_b_start_min, "end_min": bed},
+            "filters": {
+                "strict": {"max_duration_min": STAGE_B_MAX_DURATION, "max_intensity": STAGE_B_MAX_INTENSITY},
+                "fallback": {"max_duration_min": 15, "max_intensity": 0.25},
+            },
+            "recommendations": stage_b,
+        },
+    }
+
+
+def main():
+    print(f"Running {MAKE_SLEEP_PLAN_SCRIPT} ...")
+    subprocess.run(["python", MAKE_SLEEP_PLAN_SCRIPT], check=True)
+
+    print(f"\nRunning {RECOMMEND_CONTENT_SCRIPT} ...")
+    subprocess.run(["python", RECOMMEND_CONTENT_SCRIPT], check=True)
+
+    if not PLAN_JSON.exists():
+        raise FileNotFoundError(f"Missing plan file: {PLAN_JSON}")
+    if not CONTENT_JSON.exists():
+        raise FileNotFoundError(f"Missing content file: {CONTENT_JSON}")
+
+    plan = json.loads(PLAN_JSON.read_text())
+    content = json.loads(CONTENT_JSON.read_text())
+
+    stages = build_stages(plan, content)
+
+    bundle = {
+        "generated_at": datetime.now().isoformat(),
+        "plan": plan,
+        "content": content,
+        "stages": stages,
+    }
+
+    BUNDLE_OUT.write_text(json.dumps(bundle, indent=2))
+    print(f"\nWrote bundle → {BUNDLE_OUT}")
+
+    # Pretty print
+    bed = int(plan["bedtime_min"])
+    wake = int(plan["wake_min"])
+    print("\n=== Tonight (Bundle Summary) ===")
+    print(f"Bed:  {fmt_time(bed)}")
+    print(f"Wake: {fmt_time(wake)}")
+
+    print("\nStage A picks:")
+    for rec in stages["stage_a"]["recommendations"][:5]:
+        print(f"  - {rec['title']} ({rec['durationMin']} min) → {rec['url']}")
+
+    print("\nStage B picks (short + very gentle):")
+    for rec in stages["stage_b"]["recommendations"][:5]:
+        print(f"  - {rec['title']} ({rec['durationMin']} min) → {rec['url']}")
+
+if __name__ == "__main__":
+    main()

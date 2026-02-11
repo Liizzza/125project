@@ -1,7 +1,7 @@
 import pandas as pd
 
-IN_CSV = "data/sleep_records.csv"
-OUT_CSV = "data/sleep_index_nightly.csv"
+IN_CSV = "data/sleep_records2.csv"
+OUT_CSV = "data/sleep_index_nightly2.csv"
 
 ASLEEP_VALUES = {
     "HKCategoryValueSleepAnalysisAsleepCore",
