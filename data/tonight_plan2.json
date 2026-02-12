@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-02-11T15:35:47.880189",
+  "now_min": 935,
+  "bedtime_min": 1305,
+  "wake_min": 510,
+  "sleep_opportunity_min": 645,
+  "desired_sleep_min": 660,
+  "debt_min": 1677.5,
+  "constraints": {
+    "must_wake_by_min": 540,
+    "preferred_wake_min": 510,
+    "hard_constraints": {
+      "no_bed_after_min": 1410,
+      "min_sleep_opportunity_min": 420
+    },
+    "soft_constraints": {
+      "avoid_high_intensity_near_bed": true,
+      "caffeine_cutoff_min": 960
+    }
+  },
+  "baseline": {
+    "median_sleep_min": 81.5,
+    "median_bedtime_wrap": 594.0,
+    "median_wake_min": 949.0,
+    "wake_std_min": 410.57849432234025
+  },
+  "score": 4.2542857142857144,
+  "why": {
+    "desired_sleep_min": 660,
+    "sleep_opp_min": 645,
+    "mins_until_bedtime": 370,
+    "sleep_score": 0.98,
+    "wake_score": 1.0,
+    "bedtime_score": 0.95,
+    "target_wake_min": 510,
+    "no_bed_after_min": 1410,
+    "min_sleep_opportunity_min": 420,
+    "caffeine_penalty": 0.036,
+    "caffeine_cutoff_min": 960,
+    "caffeine_window_min": 420,
+    "soft_penalty_total": 0.036
+  }
+}
