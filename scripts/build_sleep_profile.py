@@ -1,8 +1,8 @@
 import json
 import pandas as pd
 
-IN_CSV = "data/sleep_index_nightly.csv"
-OUT_JSON = "data/sleep_profile.json"
+IN_CSV = "data/sleep_index_nightly2.csv"
+OUT_JSON = "data/sleep_profile2.json"
 
 def mean_or_none(s):
     s = pd.to_numeric(s, errors="coerce").dropna()
