@@ -1,11 +1,14 @@
 import csv
 import xml.etree.ElementTree as ET
+import os 
+import sys 
 
-INPUT_XML = "data/export2.xml"
-OUT_CSV = "data/sleep_records2.csv"
+
 SLEEP_TYPE = "HKCategoryTypeIdentifierSleepAnalysis"
 
-def main():
+def main(user_folder):
+    INPUT_XML = os.path.join(user_folder, "export2.xml")
+    OUT_CSV = os.path.join(user_folder, "sleep_records2.csv")
     with open(OUT_CSV, "w", newline="") as f:
         writer = csv.DictWriter(
             f,
@@ -27,4 +30,6 @@ def main():
     print(f"Wrote {OUT_CSV}")
 
 if __name__ == "__main__":
+    user_folder = sys.argv[1]
     main()
+

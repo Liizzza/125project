@@ -1,7 +1,7 @@
 import pandas as pd
+import os 
+import sys
 
-IN_CSV = "data/sleep_records2.csv"
-OUT_CSV = "data/sleep_index_nightly2.csv"
 
 ASLEEP_VALUES = {
     "HKCategoryValueSleepAnalysisAsleepCore",
@@ -32,7 +32,9 @@ def wrap_diff(diff_series):
     return ((diff_series + 720) % 1440) - 720
 
 
-def main():
+def main(user_folder):
+    IN_CSV = os.path.join(user_folder, "sleep_records2.csv")
+    OUT_CSV = os.path.join(user_folder, "sleep_index_nightly2.csv")
     df = pd.read_csv(IN_CSV)
 
     df["start"] = df["startDate"].map(parse_dt)
@@ -180,4 +182,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    user_folder = sys.argv[1]
+    main(user_folder)

@@ -1,14 +1,17 @@
 import json
+import os 
+import sys
 import pandas as pd
 
-IN_CSV = "data/sleep_index_nightly2.csv"
-OUT_JSON = "data/sleep_profile2.json"
+
 
 def mean_or_none(s):
     s = pd.to_numeric(s, errors="coerce").dropna()
     return float(s.mean()) if len(s) else None
 
-def main():
+def main(user_folder):
+    IN_CSV =  os.path.join(user_folder, "sleep_index_nightly2.csv")
+    OUT_JSON = os.path.join(user_folder, "sleep_profile2.json")
     df = pd.read_csv(IN_CSV).sort_values("sleep_date")
     recent = df.tail(30).copy()  # last 30 recorded nights
 
@@ -28,4 +31,5 @@ def main():
     print(json.dumps(profile, indent=2))
 
 if __name__ == "__main__":
-    main()
+    user_folder = sys.argv[1] 
+    main(user_folder)
