@@ -1,12 +1,14 @@
 import json
 from datetime import datetime
 import pandas as pd
+import os 
+import sys 
 
 # --------- Pick which user by editing these 4 paths ----------
-SLEEP_PROFILE = "data/sleep_profile2.json"
-SLEEP_NIGHTLY = "data/sleep_index_nightly2.csv"
-CONSTRAINTS   = "data/tomorrow_constraints2.json"   # optional
-PLAN_OUT      = "data/tonight_plan2.json"
+SLEEP_PROFILE = os.path.join(sys.argv[1], "sleep_profile2.json")
+SLEEP_NIGHTLY = os.path.join(sys.argv[1], "sleep_index_nightly2.csv")
+CONSTRAINTS   = os.path.join(sys.argv[1], "tomorrow_constraints2.json")   # optional
+PLAN_OUT      = os.path.join(sys.argv[1], "tonight_plan2.json")
 # ------------------------------------------------------------
 
 TOP_K = 5

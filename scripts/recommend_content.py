@@ -1,13 +1,15 @@
 import json
 from datetime import datetime
 import pandas as pd
+import os 
+import sys
 
-SLEEP_PROFILE = "data/sleep_profile2.json"
-SLEEP_NIGHTLY = "data/sleep_index_nightly2.csv"
+SLEEP_PROFILE = os.path.join(sys.argv[1], "sleep_profile2.json")
+SLEEP_NIGHTLY = os.path.join(sys.argv[1], "sleep_index_nightly2.csv")
 VIDEO_INDEX   = "data/video_index.csv"
-CONTENT_OUT = "data/tonight_content2.json"
+CONTENT_OUT = os.path.join(sys.argv[1], "tonight_content2.json")
 
-TONIGHT_PLAN  = "data/tonight_plan.json"
+TONIGHT_PLAN  = os.path.join(sys.argv[1], "tonight_plan.json")
 
 TOP_N = 50
 

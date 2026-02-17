@@ -1,8 +1,12 @@
 from flask import Flask, request, jsonify
+import os 
+import sys 
+#so that it can find scripts 
 from scripts.backend_utils import get_user_folder
 import subprocess  # to run scripts 
 
 app = Flask(__name__)
+
 
 @app.route("/run_sleep_plan", methods=["POST"])
 def run_sleep_plan():
