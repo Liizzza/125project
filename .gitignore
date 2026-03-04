@@ -1,5 +1,6 @@
 # Apple Health exports + personal outputs
 export.xml
+export2.xml
 export_cda.xml
 *.zip
 
@@ -13,4 +14,4 @@ __pycache__/
 .venv/
 venv/
 .env
-secrets/
+secrets/data/export*.xml

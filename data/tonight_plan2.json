@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-02-11T15:35:47.880189",
-  "now_min": 935,
+  "generated_at": "2026-02-14T17:28:43.179311",
+  "now_min": 1048,
   "bedtime_min": 1305,
   "wake_min": 510,
   "sleep_opportunity_min": 645,
@@ -28,7 +28,7 @@
   "why": {
     "desired_sleep_min": 660,
     "sleep_opp_min": 645,
-    "mins_until_bedtime": 370,
+    "mins_until_bedtime": 257,
     "sleep_score": 0.98,
     "wake_score": 1.0,
     "bedtime_score": 0.95,

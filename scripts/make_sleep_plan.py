@@ -3,10 +3,10 @@ from datetime import datetime
 import pandas as pd
 
 # --------- Pick which user by editing these 4 paths ----------
-SLEEP_PROFILE = "data/sleep_profile2.json"
-SLEEP_NIGHTLY = "data/sleep_index_nightly2.csv"
-CONSTRAINTS   = "data/tomorrow_constraints2.json"   # optional
-PLAN_OUT      = "data/tonight_plan2.json"
+SLEEP_PROFILE = "data/sleep_profile.json"
+SLEEP_NIGHTLY = "data/sleep_index_nightly.csv"
+CONSTRAINTS   = "data/tomorrow_constraints.json"   # optional
+PLAN_OUT      = "data/tonight_plan.json"
 # ------------------------------------------------------------
 
 TOP_K = 5

@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-02-11T15:35:48.298949",
+  "generated_at": "2026-02-14T17:28:43.609103",
   "context": {
-    "now_iso": "2026-02-11T15:35:48.296401",
-    "now_min": 935,
+    "now_iso": "2026-02-14T17:28:43.606542",
+    "now_min": 1048,
     "target_bedtime_min": 1399,
-    "mins_until_bedtime": 464,
+    "mins_until_bedtime": 351,
     "planned_wake_min": 450
   },
   "latest_sleep_features": {
@@ -26,7 +26,7 @@
       "durationMin": 20.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -44,7 +44,7 @@
       "durationMin": 30.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -62,7 +62,7 @@
       "durationMin": 23.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -80,7 +80,7 @@
       "durationMin": 22.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -98,7 +98,7 @@
       "durationMin": 21.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -116,7 +116,7 @@
       "durationMin": 20.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -134,7 +134,7 @@
       "durationMin": 23.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -152,7 +152,7 @@
       "durationMin": 27.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -170,7 +170,7 @@
       "durationMin": 20.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -188,7 +188,7 @@
       "durationMin": 22.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -206,7 +206,7 @@
       "durationMin": 28.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -224,7 +224,7 @@
       "durationMin": 22.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -242,7 +242,7 @@
       "durationMin": 16.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -260,7 +260,7 @@
       "durationMin": 25.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -278,7 +278,7 @@
       "durationMin": 25.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -296,7 +296,7 @@
       "durationMin": 21.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -314,7 +314,7 @@
       "durationMin": 21.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -332,7 +332,7 @@
       "durationMin": 24.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -350,7 +350,7 @@
       "durationMin": 24.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -368,7 +368,7 @@
       "durationMin": 18.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -386,7 +386,7 @@
       "durationMin": 18.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -404,7 +404,7 @@
       "durationMin": 17.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -422,7 +422,7 @@
       "durationMin": 17.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -440,7 +440,7 @@
       "durationMin": 17.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -458,7 +458,7 @@
       "durationMin": 30.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -476,7 +476,7 @@
       "durationMin": 20.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -494,7 +494,7 @@
       "durationMin": 30.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -512,7 +512,7 @@
       "durationMin": 27.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -530,7 +530,7 @@
       "durationMin": 17.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -548,7 +548,7 @@
       "durationMin": 16.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -566,7 +566,7 @@
       "durationMin": 16.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -584,7 +584,7 @@
       "durationMin": 16.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -602,7 +602,7 @@
       "durationMin": 18.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -620,7 +620,7 @@
       "durationMin": 14.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -638,7 +638,7 @@
       "durationMin": 14.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -656,7 +656,7 @@
       "durationMin": 20.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -674,7 +674,7 @@
       "durationMin": 30.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -692,7 +692,7 @@
       "durationMin": 13.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -710,7 +710,7 @@
       "durationMin": 13.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -728,7 +728,7 @@
       "durationMin": 13.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -746,7 +746,7 @@
       "durationMin": 10.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -764,7 +764,7 @@
       "durationMin": 13.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -782,7 +782,7 @@
       "durationMin": 13.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -800,7 +800,7 @@
       "durationMin": 13.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -818,7 +818,7 @@
       "durationMin": 12.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -836,7 +836,7 @@
       "durationMin": 12.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -854,7 +854,7 @@
       "durationMin": 12.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -872,7 +872,7 @@
       "durationMin": 12.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -890,7 +890,7 @@
       "durationMin": 12.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,
@@ -908,7 +908,7 @@
       "durationMin": 12.0,
       "intensity": 0.12,
       "why": {
-        "mins_until_bedtime": 464,
+        "mins_until_bedtime": 351,
         "duration_fit": 1.0,
         "intensity_score": 0.8,
         "sleep_debt_7n_min": 1677.5,

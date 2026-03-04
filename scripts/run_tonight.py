@@ -7,9 +7,9 @@ from datetime import datetime
 MAKE_SLEEP_PLAN_SCRIPT = "scripts/make_sleep_plan.py"
 RECOMMEND_CONTENT_SCRIPT = "scripts/recommend_content.py"
 
-PLAN_JSON = Path("data/tonight_plan2.json")
-CONTENT_JSON = Path("data/tonight_content2.json")
-BUNDLE_OUT = Path("data/tonight_bundle2.json")
+PLAN_JSON = Path("data/tonight_plan.json")
+CONTENT_JSON = Path("data/tonight_content.json")
+BUNDLE_OUT = Path("data/tonight_bundle.json")
 # -----------------------------------
 
 STAGE_B_MIN = 45                 # last 45 minutes before bed

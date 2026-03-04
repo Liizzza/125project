@@ -2,20 +2,20 @@ import json
 from datetime import datetime
 import pandas as pd
 
-SLEEP_PROFILE = "data/sleep_profile2.json"
-SLEEP_NIGHTLY = "data/sleep_index_nightly2.csv"
+SLEEP_PROFILE = "data/sleep_profile.json"
+SLEEP_NIGHTLY = "data/sleep_index_nightly.csv"
 VIDEO_INDEX   = "data/video_index.csv"
-CONTENT_OUT = "data/tonight_content2.json"
+CONTENT_OUT = "data/tonight_content.json"
 
 TONIGHT_PLAN  = "data/tonight_plan.json"
 
-TOP_N = 50
+TOP_N = 30
 
 # tweak these anytime
 CATEGORY_WEIGHTS = {
     "noise": 1.15,
     "nature": 1.10,
-    "meditation": 1.05,
+    "meditation": 1.40,
     "asmr": 1.00,
     "stories": 0.95,
     "music": 0.95,
