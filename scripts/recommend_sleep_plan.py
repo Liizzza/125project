@@ -2,10 +2,11 @@ import json
 import subprocess
 from pathlib import Path
 from datetime import datetime
-
+import os 
+import sys 
 # ---- Choose user by changing these two ----
 MAKE_SLEEP_PLAN_SCRIPT = "scripts/make_sleep_plan.py"
-PLAN_JSON = Path("data/tonight_plan.json")
+PLAN_JSON = os.path.join(sys.argv[1], "tonight_plan.json")
 # ------------------------------------------
 
 def fmt_time(mins: int) -> str:

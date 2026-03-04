@@ -2,14 +2,16 @@ import json
 import subprocess
 from pathlib import Path
 from datetime import datetime
+import os 
+import sys 
 
 # ---- pick user by these 3 paths ----
-MAKE_SLEEP_PLAN_SCRIPT = "scripts/make_sleep_plan.py"
-RECOMMEND_CONTENT_SCRIPT = "scripts/recommend_content.py"
+MAKE_SLEEP_PLAN_SCRIPT = os.path.join(sys.argv[1], "make_sleep_plan.py")
+RECOMMEND_CONTENT_SCRIPT = os.path.join(sys.argv[1], "recommend_content.py")
 
-PLAN_JSON = Path("data/tonight_plan2.json")
-CONTENT_JSON = Path("data/tonight_content2.json")
-BUNDLE_OUT = Path("data/tonight_bundle2.json")
+PLAN_JSON = os.path.join(sys.argv[1], "tonight_plan2.json")
+CONTENT_JSON = os.path.join(sys.argv[1], "tonight_content2.json")
+BUNDLE_OUT = os.path.join(sys.argv[1], "tonight_bundle2.json")
 # -----------------------------------
 
 STAGE_B_MIN = 45                 # last 45 minutes before bed

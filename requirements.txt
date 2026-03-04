@@ -3,3 +3,4 @@ python-dotenv
 google-api-python-client
 firebase-admin
 flask 
+flask_cors

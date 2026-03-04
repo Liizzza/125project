@@ -31,5 +31,5 @@ def main(user_folder):
 
 if __name__ == "__main__":
     user_folder = sys.argv[1]
-    main()
+    main(user_folder)
 
