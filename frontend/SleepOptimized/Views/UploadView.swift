@@ -2,9 +2,14 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct UploadView: View {
-    @State private var selectedFile: URL?
+    @EnvironmentObject var api: SleepAPIManager
     @Environment(\.dismiss) private var dismiss
-    
+
+    @State private var selectedFile: URL?
+    @State private var isUploading = false
+    @State private var uploadError: String?
+    @State private var navigateToPreferences = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header
@@ -14,62 +19,103 @@ struct UploadView: View {
                     .foregroundColor(Color(hex: "286EF1"))
             }
             .padding(.bottom, 8)
-            
+
             Text("Upload Health Data")
                 .font(.system(size: 28, weight: .bold))
                 .foregroundColor(.black)
-            
+
             Text("Step 1 of 2")
-                .font(.system(size: 14, weight: .regular))
+                .font(.system(size: 14))
                 .foregroundColor(Color(hex: "6C757D"))
                 .padding(.top, 4)
-            
+
             Rectangle()
                 .fill(Color(hex: "DEE2E6"))
                 .frame(height: 1)
                 .padding(.top, 12)
                 .padding(.bottom, 24)
-            
+
             Text("Upload Data")
                 .font(.system(size: 18, weight: .medium))
                 .foregroundColor(.black)
+                .padding(.bottom, 8)
+
+            Text("Export from the Health app: tap your profile picture → Export All Health Data")
+                .font(.system(size: 13))
+                .foregroundColor(Color(hex: "6C757D"))
                 .padding(.bottom, 16)
-            
+
             FileUploadBox(selectedFile: $selectedFile)
-                .padding(.bottom, 32)
-            
+                .padding(.bottom, 16)
+
+            if let error = uploadError {
+                Text(error)
+                    .font(.system(size: 13))
+                    .foregroundColor(.red)
+                    .padding(.bottom, 8)
+            }
+
             Spacer()
-            
-            NavigationLink(destination: PreferencesView()) {
-                Text("Next")
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color(hex: "286EF1"))
-                    .clipShape(RoundedRectangle(cornerRadius: 25))
+
+            // Triggers upload then navigates on success
+            Button(action: handleUpload) {
+                HStack(spacing: 8) {
+                    if isUploading {
+                        ProgressView().tint(.white)
+                    }
+                    Text(isUploading ? "Uploading..." : "Next")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(.white)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .background(selectedFile != nil && !isUploading
+                    ? Color(hex: "286EF1")
+                    : Color(hex: "ADB5BD"))
+                .clipShape(RoundedRectangle(cornerRadius: 25))
+            }
+            .disabled(selectedFile == nil || isUploading)
+
+            NavigationLink(destination: PreferencesView(), isActive: $navigateToPreferences) {
+                EmptyView()
             }
         }
         .padding(24)
         .background(Color.white)
         .navigationBarBackButtonHidden(true)
     }
+
+    private func handleUpload() {
+        guard let fileURL = selectedFile else { return }
+        isUploading = true
+        uploadError = nil
+
+        Task {
+            do {
+                try await api.uploadHealthData(fileURL: fileURL)
+                navigateToPreferences = true
+            } catch {
+                uploadError = error.localizedDescription
+            }
+            isUploading = false
+        }
+    }
 }
 
 struct FileUploadBox: View {
     @Binding var selectedFile: URL?
     @State private var showingFilePicker = false
-    
+
     var body: some View {
         Button(action: { showingFilePicker = true }) {
             VStack(spacing: 12) {
-                Image(systemName: "square.and.arrow.up")
+                Image(systemName: selectedFile != nil ? "checkmark.circle.fill" : "square.and.arrow.up")
                     .font(.system(size: 48))
-                    .foregroundColor(Color(hex: "6C757D"))
-                Text("Tap to upload")
+                    .foregroundColor(selectedFile != nil ? Color(hex: "22C55E") : Color(hex: "6C757D"))
+                Text(selectedFile != nil ? "File selected" : "Tap to upload")
                     .font(.system(size: 16))
                     .foregroundColor(Color(hex: "6C757D"))
-                Text("(CSV, TXT, or JSON)")
+                Text("Apple Health export.xml")
                     .font(.system(size: 14))
                     .foregroundColor(Color(hex: "ADB5BD"))
                 if let file = selectedFile {
@@ -84,8 +130,13 @@ struct FileUploadBox: View {
             .frame(minHeight: 200)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
-                    .foregroundColor(Color(hex: "DEE2E6"))
+                    .strokeBorder(
+                        style: StrokeStyle(lineWidth: 2, dash: [8]),
+                        antialiased: true
+                    )
+                    .foregroundColor(selectedFile != nil
+                        ? Color(hex: "22C55E")
+                        : Color(hex: "DEE2E6"))
             )
         }
         .buttonStyle(.plain)
