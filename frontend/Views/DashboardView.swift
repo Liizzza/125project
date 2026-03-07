@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @EnvironmentObject var api: SleepAPIManager
+    @Environment(SleepAPIManager.self) var api
 
     @State private var bundle: TonightBundle?
     @State private var isLoading = true
@@ -63,7 +63,7 @@ struct DashboardView: View {
     private func dashboardContent(bundle: TonightBundle) -> some View {
         let plan = bundle.plan
         let stages = bundle.stages
-
+        
         // Score badge
         Text("Score: \(plan.score, specifier: "%.3f")")
             .font(.system(size: 14, weight: .semibold))
@@ -76,13 +76,13 @@ struct DashboardView: View {
             )
             .clipShape(Capsule())
             .padding(.bottom, 24)
-
+        
         // Sleep Plan Card
         VStack(alignment: .leading, spacing: 16) {
             Text("Recommended Sleep Plan")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
-
+            
             HStack(spacing: 48) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Bedtime")
@@ -101,7 +101,7 @@ struct DashboardView: View {
                         .foregroundColor(.white)
                 }
             }
-
+            
             HStack(spacing: 8) {
                 InfoPill(label: "\(plan.sleepOpportunityMin) min sleep")
                 if plan.debtMin > 0 {
@@ -120,18 +120,17 @@ struct DashboardView: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.bottom, 16)
-
+        
         // Sleep Timeline Card
         VStack(alignment: .leading, spacing: 16) {
             Text("Sleep Timeline")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(Color(hex: "2D3748"))
-
+            
             TimelineNode(time: plan.bedtimeStr, event: "Start your bedtime routine", label: "Wind Down")
             TimelineConnector()
             TimelineNode(time: "Sleep Phase", event: "Deep, restorative sleep",
-                         label: "\(plan.sleepOpportunityMin / 60)h \(plan.sleepOpportunityMin % 60)m")
-            TimelineConnector()
+                         label: "\(Int(plan.sleepOpportunityMin / 60))h \(Int(plan.sleepOpportunityMin.truncatingRemainder(dividingBy: 60)))m")
             TimelineNode(time: plan.wakeStr, event: "Start your day refreshed", label: "Wake Up")
         }
         .padding(20)
@@ -139,7 +138,7 @@ struct DashboardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.06), radius: 4)
         .padding(.bottom, 16)
-
+        
         // Stage A Content
         if !stages.stageA.recommendations.isEmpty {
             ContentSection(
@@ -149,7 +148,7 @@ struct DashboardView: View {
             )
             .padding(.bottom, 16)
         }
-
+        
         // Stage B Content
         if !stages.stageB.recommendations.isEmpty {
             ContentSection(
@@ -159,18 +158,48 @@ struct DashboardView: View {
             )
             .padding(.bottom, 24)
         }
-
-        // Update Schedule button
-        NavigationLink(destination: UploadView()) {
-            Text("Update Schedule")
+        
+        // Update Preferences button
+        NavigationLink(destination: PreferencesView()) {
+            Text("Update Preferences")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
-                .background(Color.black)
+                .background(Color(hex: "286EF1"))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .padding(.bottom, 8)
+        
+        // Re-run plan button
+        Button(action: { Task { await loadBundle() } }) {
+            Text("Refresh Plan")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundColor(Color(hex: "286EF1"))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(hex: "286EF1"), lineWidth: 1.5)
+                )
+        }
+        .padding(.bottom, 8)
+        
+        // Reset button
+        Button(action: { api.clearUser() }) {
+            Text("Reset & Start Over")
+                .font(.system(size: 14))
+                .foregroundColor(Color(hex: "6C757D"))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(hex: "DEE2E6"), lineWidth: 1)
+                )
+        }
+        .padding(.bottom, 24)
     }
+
 
     // MARK: - Data loading
 
@@ -178,9 +207,11 @@ struct DashboardView: View {
         isLoading = true
         errorMessage = nil
         do {
-            // POST runs the pipeline; on subsequent loads use GET instead
             let result = try await api.runAndGetBundle()
             bundle = result
+        } catch APIError.serverError(let code, _) where code == 404 {
+            // User not found on server — clear and restart
+            api.clearUser()
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -256,29 +287,37 @@ struct ContentSection: View {
     }
 }
 
-// MARK: - Response models for bundle
+// MARK: - Timeline views (shared)
 
-struct TonightBundle: Codable {
-    let plan: SleepPlan
-    let stages: Stages
+struct TimelineNode: View {
+    let time: String
+    let event: String
+    let label: String
 
-    struct Stages: Codable {
-        let stageA: StageContent
-        let stageB: StageContent
-
-        enum CodingKeys: String, CodingKey {
-            case stageA = "stage_a"
-            case stageB = "stage_b"
+    var body: some View {
+        HStack(alignment: .top, spacing: 16) {
+            Text(time)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(Color(hex: "2D3748"))
+                .frame(width: 80, alignment: .leading)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(event)
+                    .font(.system(size: 14))
+                    .foregroundColor(Color(hex: "2D3748"))
+                Text(label)
+                    .font(.system(size: 12))
+                    .foregroundColor(Color(hex: "6C757D"))
+            }
+            Spacer()
         }
-    }
-
-    struct StageContent: Codable {
-        let label: String
-        let recommendations: [ContentRecommendation]
     }
 }
 
-// Extend SleepPlan to include nap_credit_min
-extension SleepPlan {
-    var napCreditMin: Double? { nil } // populated via full decode — see SleepAPIManager
+struct TimelineConnector: View {
+    var body: some View {
+        Rectangle()
+            .fill(Color(hex: "E2E8F0"))
+            .frame(width: 2, height: 24)
+            .padding(.leading, 40)
+    }
 }

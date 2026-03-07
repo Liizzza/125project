@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PreferencesView: View {
-    @EnvironmentObject var api: SleepAPIManager
+    @Environment(SleepAPIManager.self) var api
     @Environment(\.dismiss) private var dismiss
 
     // Schedule
@@ -140,7 +140,7 @@ struct PreferencesView: View {
                 Button(action: handleGenerate) {
                     HStack(spacing: 8) {
                         if isSaving { ProgressView().tint(.white) }
-                        Text(isSaving ? "Generating..." : "Generate Sleep Plan")
+                        Text(isSaving ? "Saving & Updating Plan..." : "Save & Update Plan")
                             .font(.system(size: 16, weight: .semibold))
                             .foregroundColor(.white)
                     }
@@ -151,14 +151,15 @@ struct PreferencesView: View {
                 }
                 .disabled(isSaving)
 
-                NavigationLink(destination: DashboardView(), isActive: $navigateToDashboard) {
-                    EmptyView()
-                }
             }
             .padding(24)
         }
         .background(Color.white)
         .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $navigateToDashboard) {
+            DashboardView()
+                .navigationBarBackButtonHidden(true)
+        }
     }
 
     private func handleGenerate() {
@@ -179,7 +180,8 @@ struct PreferencesView: View {
         Task {
             do {
                 try await api.savePreferences(prefs)
-                navigateToDashboard = true
+                _ = try await api.runAndGetBundle()
+                navigateToDashboard = true  // always push/replace with fresh dashboard
             } catch {
                 saveError = error.localizedDescription
             }

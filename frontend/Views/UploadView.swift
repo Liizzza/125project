@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct UploadView: View {
-    @EnvironmentObject var api: SleepAPIManager
+    @Environment(SleepAPIManager.self) var api
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedFile: URL?
@@ -76,13 +76,15 @@ struct UploadView: View {
             }
             .disabled(selectedFile == nil || isUploading)
 
-            NavigationLink(destination: PreferencesView(), isActive: $navigateToPreferences) {
-                EmptyView()
-            }
+
         }
         .padding(24)
         .background(Color.white)
         .navigationBarBackButtonHidden(true)
+        .navigationDestination(isPresented: $navigateToPreferences) {
+            PreferencesView()
+                .navigationBarBackButtonHidden(true)
+        }
     }
 
     private func handleUpload() {

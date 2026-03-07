@@ -409,6 +409,10 @@ def run_and_get_bundle(user_id: str):
     if res["returncode"] != 0:
         raise HTTPException(status_code=500, detail=f"Bundle failed: {res['stderr']}")
     data = load_json_file(user_files(user_id)["tonight_bundle"])
+    # Inject human-readable time strings into plan if missing
+    if "plan" in data and "bedtime_str" not in data["plan"]:
+        data["plan"]["bedtime_str"] = fmt_time(data["plan"]["bedtime_min"])
+        data["plan"]["wake_str"]    = fmt_time(data["plan"]["wake_min"])
     data["user_id"] = user_id
     return data
 
@@ -418,5 +422,9 @@ def get_bundle(user_id: str):
     """Return the last generated bundle without re-running the pipeline."""
     assert_user_exists(user_id)
     data = load_json_file(user_files(user_id)["tonight_bundle"])
+    # Inject human-readable time strings into plan if missing
+    if "plan" in data and "bedtime_str" not in data["plan"]:
+        data["plan"]["bedtime_str"] = fmt_time(data["plan"]["bedtime_min"])
+        data["plan"]["wake_str"]    = fmt_time(data["plan"]["wake_min"])
     data["user_id"] = user_id
     return data

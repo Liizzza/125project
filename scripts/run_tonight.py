@@ -8,6 +8,8 @@ import os
 DATA_DIR = Path(os.environ.get("USER_DATA_DIR", "data"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+BUILD_NIGHTLY_SCRIPT     = "scripts/build_sleep_nightly.py"
+BUILD_PROFILE_SCRIPT     = "scripts/build_sleep_profile.py"
 MAKE_SLEEP_PLAN_SCRIPT   = "scripts/make_sleep_plan.py"
 RECOMMEND_CONTENT_SCRIPT = "scripts/recommend_content.py"
 
@@ -103,6 +105,8 @@ def main():
     env["USER_DATA_DIR"] = str(DATA_DIR)
 
     print(f"Running {MAKE_SLEEP_PLAN_SCRIPT} ...")
+    subprocess.run(["python3", BUILD_NIGHTLY_SCRIPT], check=True, env=env)
+    subprocess.run(["python3", BUILD_PROFILE_SCRIPT], check=True, env=env)
     subprocess.run(["python3", MAKE_SLEEP_PLAN_SCRIPT], check=True, env=env)
 
     print(f"\nRunning {RECOMMEND_CONTENT_SCRIPT} ...")
