@@ -22,6 +22,9 @@ struct SleepPlan: Codable {
     let debtMin: Double
     let score: Double
     let napCreditMin: Double?
+    let qualityLabel: String?
+    let qualitySubtitle: String?
+    let qualityColor: String?
 
     enum CodingKeys: String, CodingKey {
         case generatedAt         = "generated_at"
@@ -34,6 +37,9 @@ struct SleepPlan: Codable {
         case debtMin             = "debt_min"
         case score
         case napCreditMin        = "nap_credit_min"
+        case qualityLabel        = "quality_label"
+        case qualitySubtitle     = "quality_subtitle"
+        case qualityColor        = "quality_color"
     }
 }
 
@@ -56,24 +62,40 @@ struct ContentRecommendation: Codable, Identifiable {
 struct TonightBundle: Codable {
     let generatedAt: String
     let plan: SleepPlan
-    let stages: Stages
+    let stages: SleepStages
     let userId: String?
-    struct Stages: Codable {
-        let stageA: StageContent
-        let stageB: StageContent
-        enum CodingKeys: String, CodingKey {
-            case stageA = "stage_a"; case stageB = "stage_b"
-        }
-    }
-    struct StageContent: Codable {
-        let label: String
-        let recommendations: [ContentRecommendation]
-    }
+
     enum CodingKeys: String, CodingKey {
         case generatedAt = "generated_at"
         case plan, stages
         case userId = "user_id"
     }
+}
+
+struct SleepStages: Codable {
+    let nowIso: String
+    let nowMin: Double
+    let bedtimeMins: Double
+    let wakeMins: Double
+    let minsUntilBedtime: Double
+    let stageA: StageContent
+    let stageB: StageContent
+
+    enum CodingKeys: String, CodingKey {
+        case nowIso           = "now_iso"
+        case nowMin           = "now_min"
+        case bedtimeMins      = "bedtime_min"
+        case wakeMins         = "wake_min"
+        case minsUntilBedtime = "mins_until_bedtime"
+        case stageA           = "stage_a"
+        case stageB           = "stage_b"
+    }
+}
+
+struct StageContent: Codable {
+    let label: String
+    let window: String?
+    let recommendations: [ContentRecommendation]
 }
 
 struct SleepPreferencesRequest: Codable {

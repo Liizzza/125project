@@ -4,21 +4,19 @@ import pandas as pd
 import os
 from pathlib import Path
 
-# Multi-user: API injects USER_DATA_DIR per user. Falls back to "data/" for manual runs.
 DATA_DIR = Path(os.environ.get("USER_DATA_DIR", "data"))
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# User-specific files
 SLEEP_PROFILE = str(DATA_DIR / "sleep_profile.json")
 SLEEP_NIGHTLY = str(DATA_DIR / "sleep_index_nightly.csv")
 TONIGHT_PLAN  = str(DATA_DIR / "tonight_plan.json")
 CONTENT_OUT   = str(DATA_DIR / "tonight_content.json")
 
-# Shared across ALL users — lives at the repo root data/ folder, not per-user
 _SCRIPT_DIR = Path(__file__).parent
 VIDEO_INDEX = str(_SCRIPT_DIR.parent / "data" / "video_index.csv")
 
 TOP_N = 50
+MAX_PER_CATEGORY = 2  # Content diversity: max 2 videos per category in final recs
 
 CATEGORY_WEIGHTS = {
     "noise":           1.15,
@@ -31,7 +29,11 @@ CATEGORY_WEIGHTS = {
     "other":           0.85,
 }
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+# Circadian rhythm: ideal bedtime window (minutes from midnight)
+# Outside this window gets a penalty
+CIRCADIAN_IDEAL_START = 21 * 60   # 9 PM
+CIRCADIAN_IDEAL_END   = 2 * 60    # 2 AM (wraps past midnight)
+CIRCADIAN_PENALTY_MAX = 0.3
 
 def load_json(path):
     try:
@@ -53,34 +55,31 @@ def wrap_minutes(m: float) -> float:
 def choose_tonight_context(profile: dict, plan: dict):
     now     = datetime.now()
     now_min = minutes_from_midnight(now)
-
     target_bedtime_min = plan.get("bedtime_min", profile.get("target_bedtime_min"))
     if target_bedtime_min is None:
         target_bedtime_min = 23 * 60 + 30
     target_bedtime_min = int(target_bedtime_min)
-
     mins_until = (target_bedtime_min - now_min) % 1440
     if mins_until > 12 * 60:
         mins_until = 0
-
     return {
-        "now_iso":             now.isoformat(),
-        "now_min":             now_min,
-        "target_bedtime_min":  target_bedtime_min,
-        "mins_until_bedtime":  int(mins_until),
-        "planned_wake_min":    plan.get("wake_min"),
+        "now_iso":            now.isoformat(),
+        "now_min":            now_min,
+        "target_bedtime_min": target_bedtime_min,
+        "mins_until_bedtime": int(mins_until),
+        "planned_wake_min":   plan.get("wake_min"),
     }
 
 def latest_nightly_features(nightly_df: pd.DataFrame) -> dict:
     nightly_df = nightly_df.sort_values("sleep_date")
     last       = nightly_df.iloc[-1].to_dict()
     return {
-        "sleep_debt_7n_min":          float(last.get("sleep_debt_7n_min"))  if pd.notna(last.get("sleep_debt_7n_min"))  else 0.0,
-        "bedtime_drift_min":          float(last.get("bedtime_drift_min"))  if pd.notna(last.get("bedtime_drift_min"))  else 0.0,
-        "bedtime_std_7n":             float(last.get("bedtime_std_7n"))     if pd.notna(last.get("bedtime_std_7n"))     else None,
-        "wake_std_7n":                float(last.get("wake_std_7n"))        if "wake_std_7n" in nightly_df.columns and pd.notna(last.get("wake_std_7n")) else None,
-        "most_recent_sleep_date":     str(last.get("sleep_date")),
-        "most_recent_total_sleep_min": float(last.get("total_sleep_min"))   if pd.notna(last.get("total_sleep_min"))   else None,
+        "sleep_debt_7n_min":           float(last.get("sleep_debt_7n_min"))  if pd.notna(last.get("sleep_debt_7n_min"))  else 0.0,
+        "bedtime_drift_min":           float(last.get("bedtime_drift_min"))  if pd.notna(last.get("bedtime_drift_min"))  else 0.0,
+        "bedtime_std_7n":              float(last.get("bedtime_std_7n"))     if pd.notna(last.get("bedtime_std_7n"))     else None,
+        "wake_std_7n":                 float(last.get("wake_std_7n"))        if "wake_std_7n" in nightly_df.columns and pd.notna(last.get("wake_std_7n")) else None,
+        "most_recent_sleep_date":      str(last.get("sleep_date")),
+        "most_recent_total_sleep_min": float(last.get("total_sleep_min"))    if pd.notna(last.get("total_sleep_min"))    else None,
     }
 
 def score_row(row, ctx, feats, profile):
@@ -88,9 +87,9 @@ def score_row(row, ctx, feats, profile):
     intensity = float(row["intensity"])
     category  = row.get("category", "other")
 
-    mins_until  = ctx["mins_until_bedtime"]
-    sleep_debt  = feats["sleep_debt_7n_min"]
-    drift       = feats["bedtime_drift_min"]
+    mins_until = ctx["mins_until_bedtime"]
+    sleep_debt = feats["sleep_debt_7n_min"]
+    drift      = feats["bedtime_drift_min"]
 
     # Duration fit
     if mins_until <= 10:
@@ -113,14 +112,10 @@ def score_row(row, ctx, feats, profile):
         ideal = 25
 
     intensity_score = max(0.0, 1.0 - (intensity_penalty_strength * intensity))
-    # Merge user's custom weights on top of defaults (user overrides win)
     effective_weights = {**CATEGORY_WEIGHTS, **(profile.get("category_weights") or {})}
     cat_w = effective_weights.get(category, 0.85)
 
-    # Stage-aware category bonus:
-    # Stage B = last 45 min before bed (mins_until <= 45), Stage A = everything before
-    in_stage_b = mins_until <= 45
-
+    in_stage_b  = mins_until <= 45
     if in_stage_b:
         stage_cats = profile.get("stage_b_categories") or profile.get("preferred_categories") or []
     else:
@@ -143,17 +138,24 @@ def score_row(row, ctx, feats, profile):
         "bedtime_drift_min":  round(drift, 1),
         "category_weight":    round(cat_w, 2),
         "category_bonus":     round(cat_bonus, 2),
-        "stage":               "B" if in_stage_b else "A",
+        "stage":              "B" if in_stage_b else "A",
     }
 
-def recent_nights(nightly_df: pd.DataFrame, n=30) -> pd.DataFrame:
-    nightly_df = nightly_df.sort_values("sleep_date")
-    keep = nightly_df[
-        nightly_df["bedtime"].notna()
-        & nightly_df["wake_time"].notna()
-        & nightly_df["total_sleep_min"].notna()
-    ].copy()
-    return keep.tail(n)
+def diversify_recommendations(scored_list, max_per_category=MAX_PER_CATEGORY):
+    """
+    Content diversity: ensure no more than max_per_category videos
+    from the same category appear in the final list.
+    """
+    category_counts = {}
+    diversified = []
+    for item in scored_list:
+        s, dbg, row = item
+        cat = str(row.get("category", "other"))
+        count = category_counts.get(cat, 0)
+        if count < max_per_category:
+            diversified.append(item)
+            category_counts[cat] = count + 1
+    return diversified
 
 def explain(row, dbg):
     bits = [f"{row['category']} · {int(row['durationMin'])} min · intensity {row['intensity']}"]
@@ -167,8 +169,6 @@ def explain(row, dbg):
         stage = dbg.get("stage", "A")
         bits.append(f"matches your Stage {stage} category preference")
     return " | ".join(bits)
-
-# ── Main ───────────────────────────────────────────────────────────────────────
 
 def main():
     profile = load_profile(SLEEP_PROFILE)
@@ -188,7 +188,10 @@ def main():
         scored.append((s, dbg, row))
 
     scored.sort(key=lambda x: x[0], reverse=True)
-    top = scored[:TOP_N]
+
+    # Apply diversity filter before taking top N
+    diverse = diversify_recommendations(scored, MAX_PER_CATEGORY)
+    top = diverse[:TOP_N]
 
     out = {
         "generated_at": datetime.now().isoformat(),
@@ -214,17 +217,6 @@ def main():
     with open(CONTENT_OUT, "w") as f:
         json.dump(out, f, indent=2)
     print(f"\nWrote content → {CONTENT_OUT}")
-    print("\n=== Context ===")
-    print("Now:", ctx["now_iso"])
-    print("Minutes until target bedtime:", ctx["mins_until_bedtime"])
-    print("\n=== Latest sleep features ===")
-    print(feats)
-    print("\n=== Top recommendations ===")
-    for rank, (s, dbg, row) in enumerate(top[:5], start=1):
-        print(f"\n{rank}. SCORE {s:.3f} — {row['title']}")
-        print("   ", explain(row, dbg))
-        print("    ", row["url"])
-
 
 if __name__ == "__main__":
     main()
