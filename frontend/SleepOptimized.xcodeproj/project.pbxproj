@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6E447A752F5FCBBA0027196B /* NapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E447A742F5FCBB80027196B /* NapView.swift */; };
 		6EFE1C1A2F5B8B49003353BC /* SleepAPIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C0E2F5B8B49003353BC /* SleepAPIManager.swift */; };
 		6EFE1C1B2F5B8B49003353BC /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C142F5B8B49003353BC /* WelcomeView.swift */; };
 		6EFE1C1C2F5B8B49003353BC /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C102F5B8B49003353BC /* DashboardView.swift */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6E447A742F5FCBB80027196B /* NapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NapView.swift; sourceTree = "<group>"; };
 		6EFE1C0B2F5B8B49003353BC /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		6EFE1C0D2F5B8B49003353BC /* DocumentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPicker.swift; sourceTree = "<group>"; };
 		6EFE1C0E2F5B8B49003353BC /* SleepAPIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepAPIManager.swift; sourceTree = "<group>"; };
@@ -72,6 +74,7 @@
 		6EFE1C152F5B8B49003353BC /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				6E447A742F5FCBB80027196B /* NapView.swift */,
 				6EFE1C102F5B8B49003353BC /* DashboardView.swift */,
 				6EFE1C112F5B8B49003353BC /* LoginView.swift */,
 				6EFE1C122F5B8B49003353BC /* PreferencesView.swift */,
@@ -193,6 +196,7 @@
 				6EFE1C1F2F5B8B49003353BC /* PreferencesView.swift in Sources */,
 				6EFE1C202F5B8B49003353BC /* DocumentPicker.swift in Sources */,
 				6EFE1C212F5B8B49003353BC /* UploadView.swift in Sources */,
+				6E447A752F5FCBBA0027196B /* NapView.swift in Sources */,
 				6EFE1C222F5B8B49003353BC /* Color+Hex.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

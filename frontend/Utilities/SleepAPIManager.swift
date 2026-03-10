@@ -103,6 +103,49 @@ struct SleepPreferencesRequest: Codable {
     }
 }
 
+// MARK: - Nap Models
+
+struct NapLog: Codable {
+    let durationMinutes: Int
+    let napTime: String?
+    enum CodingKeys: String, CodingKey {
+        case durationMinutes = "duration_minutes"
+        case napTime = "nap_time"
+    }
+}
+
+struct NapResponse: Codable {
+    let message: String
+    let nap: NapResponseEntry?
+    
+    struct NapResponseEntry: Codable {
+        let durationMinutes: Double
+        let napTime: String?
+        enum CodingKeys: String, CodingKey {
+            case durationMinutes = "duration_minutes"
+            case napTime = "nap_time"
+        }
+    }
+}
+
+struct NapStatus: Codable {
+    let nap: NapEntry?
+    
+    var hasNap: Bool { nap != nil }
+    var durationMinutes: Int? { nap.map { Int($0.durationMinutes) } }
+    var napTime: String? { nap?.napTime }
+    
+    struct NapEntry: Codable {
+        let durationMinutes: Double
+        let napTime: String?
+        let date: String?
+        enum CodingKeys: String, CodingKey {
+            case durationMinutes = "duration_minutes"
+            case napTime = "nap_time"
+            case date
+        }
+    }
+}
 // MARK: - API Errors
 
 enum APIError: LocalizedError {
@@ -200,7 +243,6 @@ class SleepAPIManager {
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
             throw APIError.serverError(http.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
         }
-        // ignore response body
     }
 
     func runAndGetBundle() async throws -> TonightBundle {
@@ -209,6 +251,20 @@ class SleepAPIManager {
 
     func getBundle() async throws -> TonightBundle {
         return try await request(path: try userPath("/tonight/bundle"))
+    }
+
+    // MARK: - Nap API
+
+    func logNap(durationMinutes: Int, napTime: String? = nil) async throws -> NapResponse {
+        let path = try userPath("/nap")
+        let nap = NapLog(durationMinutes: durationMinutes, napTime: napTime)
+        let body = try JSONEncoder().encode(nap)
+        return try await request(path: path, method: "POST", body: body)
+    }
+
+    func getTodayNap() async throws -> NapStatus {
+        let path = try userPath("/nap")
+        return try await request(path: path)
     }
 
     func clearUser() {

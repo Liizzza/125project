@@ -6,6 +6,8 @@ struct DashboardView: View {
     @State private var bundle: TonightBundle?
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var showNapSheet = false
+    @State private var todayNap: NapStatus?
 
     var body: some View {
         ScrollView {
@@ -55,6 +57,14 @@ struct DashboardView: View {
         .background(Color(hex: "E8EEF5"))
         .navigationBarBackButtonHidden(true)
         .task { await loadBundle() }
+        .sheet(isPresented: $showNapSheet, onDismiss: {
+            Task { await loadBundle() }
+        }) {
+            NapView()
+                .environment(api)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.hidden)
+        }
     }
 
     // MARK: - Main content
@@ -63,7 +73,7 @@ struct DashboardView: View {
     private func dashboardContent(bundle: TonightBundle) -> some View {
         let plan = bundle.plan
         let stages = bundle.stages
-        
+
         // Score badge
         Text("Score: \(plan.score, specifier: "%.3f")")
             .font(.system(size: 14, weight: .semibold))
@@ -76,13 +86,13 @@ struct DashboardView: View {
             )
             .clipShape(Capsule())
             .padding(.bottom, 24)
-        
+
         // Sleep Plan Card
         VStack(alignment: .leading, spacing: 16) {
             Text("Recommended Sleep Plan")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(.white)
-            
+
             HStack(spacing: 48) {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Bedtime")
@@ -101,14 +111,14 @@ struct DashboardView: View {
                         .foregroundColor(.white)
                 }
             }
-            
+
             HStack(spacing: 8) {
-                InfoPill(label: "\(plan.sleepOpportunityMin) min sleep")
+                InfoPill(label: "\(Int(plan.sleepOpportunityMin)) min sleep")
                 if plan.debtMin > 0 {
                     InfoPill(label: "Debt: \(Int(plan.debtMin)) min")
                 }
                 if let nap = plan.napCreditMin, nap > 0 {
-                    InfoPill(label: "Nap credit: \(Int(nap)) min")
+                    InfoPill(label: "Nap: -\(Int(nap)) min debt")
                 }
             }
         }
@@ -120,17 +130,22 @@ struct DashboardView: View {
         )
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.bottom, 16)
-        
+
+        // Nap Card
+        NapCard(todayNap: todayNap, onTap: { showNapSheet = true })
+            .padding(.bottom, 16)
+
         // Sleep Timeline Card
         VStack(alignment: .leading, spacing: 16) {
             Text("Sleep Timeline")
                 .font(.system(size: 16, weight: .semibold))
                 .foregroundColor(Color(hex: "2D3748"))
-            
+
             TimelineNode(time: plan.bedtimeStr, event: "Start your bedtime routine", label: "Wind Down")
             TimelineConnector()
             TimelineNode(time: "Sleep Phase", event: "Deep, restorative sleep",
                          label: "\(Int(plan.sleepOpportunityMin / 60))h \(Int(plan.sleepOpportunityMin.truncatingRemainder(dividingBy: 60)))m")
+            TimelineConnector()
             TimelineNode(time: plan.wakeStr, event: "Start your day refreshed", label: "Wake Up")
         }
         .padding(20)
@@ -138,7 +153,7 @@ struct DashboardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.06), radius: 4)
         .padding(.bottom, 16)
-        
+
         // Stage A Content
         if !stages.stageA.recommendations.isEmpty {
             ContentSection(
@@ -148,7 +163,7 @@ struct DashboardView: View {
             )
             .padding(.bottom, 16)
         }
-        
+
         // Stage B Content
         if !stages.stageB.recommendations.isEmpty {
             ContentSection(
@@ -158,7 +173,7 @@ struct DashboardView: View {
             )
             .padding(.bottom, 24)
         }
-        
+
         // Update Preferences button
         NavigationLink(destination: PreferencesView()) {
             Text("Update Preferences")
@@ -170,8 +185,8 @@ struct DashboardView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .padding(.bottom, 8)
-        
-        // Re-run plan button
+
+        // Refresh button
         Button(action: { Task { await loadBundle() } }) {
             Text("Refresh Plan")
                 .font(.system(size: 16, weight: .semibold))
@@ -184,7 +199,7 @@ struct DashboardView: View {
                 )
         }
         .padding(.bottom, 8)
-        
+
         // Reset button
         Button(action: { api.clearUser() }) {
             Text("Reset & Start Over")
@@ -200,7 +215,6 @@ struct DashboardView: View {
         .padding(.bottom, 24)
     }
 
-
     // MARK: - Data loading
 
     private func loadBundle() async {
@@ -209,8 +223,8 @@ struct DashboardView: View {
         do {
             let result = try await api.runAndGetBundle()
             bundle = result
+            await loadTodayNap()
         } catch APIError.serverError(let code, _) where code == 404 {
-            // User not found on server — clear and restart
             api.clearUser()
         } catch {
             errorMessage = error.localizedDescription
@@ -218,10 +232,60 @@ struct DashboardView: View {
         isLoading = false
     }
 
+    private func loadTodayNap() async {
+        todayNap = try? await api.getTodayNap()
+    }
+
     private func todayString() -> String {
         let f = DateFormatter()
         f.dateFormat = "EEEE, MMM d"
         return f.string(from: Date())
+    }
+}
+
+// MARK: - Nap Card
+
+struct NapCard: View {
+    let todayNap: NapStatus?
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 16) {
+                Image(systemName: todayNap?.hasNap == true ? "moon.zzz.fill" : "moon.zzz")
+                    .font(.system(size: 28))
+                    .foregroundColor(Color(hex: "8B5CF6"))
+                    .frame(width: 44, height: 44)
+                    .background(Color(hex: "F3F0FF"))
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Today's Nap")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(Color(hex: "2D3748"))
+                    if let nap = todayNap, nap.hasNap, let dur = nap.durationMinutes {
+                        Text("\(dur) min logged\(nap.napTime.map { " at \($0)" } ?? "")")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(hex: "22C55E"))
+                    } else {
+                        Text("Tap to log a nap")
+                            .font(.system(size: 13))
+                            .foregroundColor(Color(hex: "6C757D"))
+                    }
+                }
+
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14))
+                    .foregroundColor(Color(hex: "ADB5BD"))
+            }
+            .padding(16)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(color: .black.opacity(0.06), radius: 4)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -286,8 +350,6 @@ struct ContentSection: View {
         .shadow(color: .black.opacity(0.06), radius: 4)
     }
 }
-
-// MARK: - Timeline views (shared)
 
 struct TimelineNode: View {
     let time: String
