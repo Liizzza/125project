@@ -22,6 +22,9 @@ struct SleepPlan: Codable {
     let debtMin: Double
     let score: Double
     let napCreditMin: Double?
+    let qualityLabel: String?
+    let qualitySubtitle: String?
+    let qualityColor: String?
 
     enum CodingKeys: String, CodingKey {
         case generatedAt         = "generated_at"
@@ -34,6 +37,9 @@ struct SleepPlan: Codable {
         case debtMin             = "debt_min"
         case score
         case napCreditMin        = "nap_credit_min"
+        case qualityLabel        = "quality_label"
+        case qualitySubtitle     = "quality_subtitle"
+        case qualityColor        = "quality_color"
     }
 }
 
@@ -56,24 +62,40 @@ struct ContentRecommendation: Codable, Identifiable {
 struct TonightBundle: Codable {
     let generatedAt: String
     let plan: SleepPlan
-    let stages: Stages
+    let stages: SleepStages
     let userId: String?
-    struct Stages: Codable {
-        let stageA: StageContent
-        let stageB: StageContent
-        enum CodingKeys: String, CodingKey {
-            case stageA = "stage_a"; case stageB = "stage_b"
-        }
-    }
-    struct StageContent: Codable {
-        let label: String
-        let recommendations: [ContentRecommendation]
-    }
+
     enum CodingKeys: String, CodingKey {
         case generatedAt = "generated_at"
         case plan, stages
         case userId = "user_id"
     }
+}
+
+struct SleepStages: Codable {
+    let nowIso: String
+    let nowMin: Double
+    let bedtimeMins: Double
+    let wakeMins: Double
+    let minsUntilBedtime: Double
+    let stageA: StageContent
+    let stageB: StageContent
+
+    enum CodingKeys: String, CodingKey {
+        case nowIso           = "now_iso"
+        case nowMin           = "now_min"
+        case bedtimeMins      = "bedtime_min"
+        case wakeMins         = "wake_min"
+        case minsUntilBedtime = "mins_until_bedtime"
+        case stageA           = "stage_a"
+        case stageB           = "stage_b"
+    }
+}
+
+struct StageContent: Codable {
+    let label: String
+    let window: String?
+    let recommendations: [ContentRecommendation]
 }
 
 struct SleepPreferencesRequest: Codable {
@@ -103,6 +125,49 @@ struct SleepPreferencesRequest: Codable {
     }
 }
 
+// MARK: - Nap Models
+
+struct NapLog: Codable {
+    let durationMinutes: Int
+    let napTime: String?
+    enum CodingKeys: String, CodingKey {
+        case durationMinutes = "duration_minutes"
+        case napTime = "nap_time"
+    }
+}
+
+struct NapResponse: Codable {
+    let message: String
+    let nap: NapResponseEntry?
+    
+    struct NapResponseEntry: Codable {
+        let durationMinutes: Double
+        let napTime: String?
+        enum CodingKeys: String, CodingKey {
+            case durationMinutes = "duration_minutes"
+            case napTime = "nap_time"
+        }
+    }
+}
+
+struct NapStatus: Codable {
+    let nap: NapEntry?
+    
+    var hasNap: Bool { nap != nil }
+    var durationMinutes: Int? { nap.map { Int($0.durationMinutes) } }
+    var napTime: String? { nap?.napTime }
+    
+    struct NapEntry: Codable {
+        let durationMinutes: Double
+        let napTime: String?
+        let date: String?
+        enum CodingKeys: String, CodingKey {
+            case durationMinutes = "duration_minutes"
+            case napTime = "nap_time"
+            case date
+        }
+    }
+}
 // MARK: - API Errors
 
 enum APIError: LocalizedError {
@@ -200,7 +265,6 @@ class SleepAPIManager {
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
             throw APIError.serverError(http.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
         }
-        // ignore response body
     }
 
     func runAndGetBundle() async throws -> TonightBundle {
@@ -209,6 +273,20 @@ class SleepAPIManager {
 
     func getBundle() async throws -> TonightBundle {
         return try await request(path: try userPath("/tonight/bundle"))
+    }
+
+    // MARK: - Nap API
+
+    func logNap(durationMinutes: Int, napTime: String? = nil) async throws -> NapResponse {
+        let path = try userPath("/nap")
+        let nap = NapLog(durationMinutes: durationMinutes, napTime: napTime)
+        let body = try JSONEncoder().encode(nap)
+        return try await request(path: path, method: "POST", body: body)
+    }
+
+    func getTodayNap() async throws -> NapStatus {
+        let path = try userPath("/nap")
+        return try await request(path: path)
     }
 
     func clearUser() {

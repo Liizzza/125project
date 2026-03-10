@@ -1,24 +1,5 @@
 """
 Sleep Coach API — FastAPI backend (multi-user, v3)
-
-New in v3:
-  - Stage A / Stage B category preferences (time-of-night content tuning)
-  - Nap logging: POST /users/{user_id}/nap — subtracts nap from tonight's sleep debt
-
-Endpoints:
-  POST /upload/health-data                      → Upload XML, returns new user_id
-  POST /users/{user_id}/preferences             → Save sleep preferences & constraints
-  POST /users/{user_id}/nap                     → Log a nap taken today
-  GET  /users/{user_id}/nap                     → Get today's nap log
-  POST /users/{user_id}/run/pipeline            → Run full analysis pipeline
-  GET  /users/{user_id}/sleep/plan              → Get tonight's sleep plan
-  GET  /users/{user_id}/sleep/profile           → Get sleep profile summary
-  GET  /users/{user_id}/sleep/history           → Get nightly sleep history
-  GET  /users/{user_id}/content/recommendations → Get content recommendations
-  POST /users/{user_id}/tonight/bundle          → Run pipeline + return full bundle
-  GET  /users/{user_id}/tonight/bundle          → Get last generated bundle
-  GET  /users                                   → List all user IDs (admin/debug)
-  GET  /health                                  → Health check
 """
 
 from fastapi import FastAPI, UploadFile, File, HTTPException
@@ -78,7 +59,7 @@ def user_files(user_id: str) -> dict:
         "tonight_plan":    d / "tonight_plan.json",
         "tonight_content": d / "tonight_content.json",
         "tonight_bundle":  d / "tonight_bundle.json",
-        "nap_log":         d / "nap_log.json",          # ← new
+        "nap_log":         d / "nap_log.json",
     }
 
 def assert_user_exists(user_id: str):
@@ -125,6 +106,76 @@ def time_str_to_min(t: Optional[str]) -> Optional[int]:
     except Exception:
         raise HTTPException(status_code=422, detail=f"Invalid time '{t}'. Use HH:MM (24h).")
 
+def enrich_bundle(data: dict, user_id: str) -> dict:
+    """
+    Inject all fields the Swift app expects but that run_tonight.py
+    may not write: bedtime_str, wake_str, quality label, stage windows.
+    """
+    # ── Plan: human-readable times + quality label ─────────────────────────
+    if "plan" in data:
+        plan = data["plan"]
+        if "bedtime_str" not in plan:
+            plan["bedtime_str"] = fmt_time(plan.get("bedtime_min", 0))
+        if "wake_str" not in plan:
+            plan["wake_str"] = fmt_time(plan.get("wake_min", 0))
+
+        # Quality label — compute here if not already set by make_sleep_plan.py
+        if "quality_label" not in plan:
+            debt  = float(plan.get("debt_min", 0))
+            score = float(plan.get("score", 0))
+            plan["quality_label"], plan["quality_subtitle"], plan["quality_color"] = \
+                quality_label(score, debt)
+
+    # ── Stages: inject window strings ─────────────────────────────────────
+    if "stages" in data:
+        stages = data["stages"]
+        now_min     = int(stages.get("now_min", 0))
+        bedtime_min = int(stages.get("bedtime_min", 0))
+        wake_min    = int(stages.get("wake_min", 0))
+
+        mins_until_bed = (bedtime_min - now_min) % 1440
+        stage_b_start  = max(0, mins_until_bed - 45)
+
+        # Stage A window: now → 45 min before bed
+        if stage_b_start > 0:
+            stage_a_window = f"Now → {fmt_time((now_min + stage_b_start) % 1440)}"
+        else:
+            stage_a_window = "Wind-down time"
+
+        # Stage B window: last 45 min before bed
+        stage_b_window = f"{fmt_time((bedtime_min - 45) % 1440)} → {fmt_time(bedtime_min)}"
+
+        if "stage_a" in stages:
+            stages["stage_a"]["label"] = "Wind Down"
+            stages["stage_a"]["window"] = stage_a_window
+        if "stage_b" in stages:
+            stages["stage_b"]["label"] = "Lights Out"
+            stages["stage_b"]["window"] = stage_b_window
+
+    data["user_id"] = user_id
+    return data
+
+
+def quality_label(score: float, debt_min: float) -> tuple:
+    """Returns (label, subtitle, color_hex)."""
+    if debt_min < 60:
+        if score >= 3.5:
+            return ("Well Rested",     "Your sleep is on track",             "22C55E")
+        elif score >= 2.5:
+            return ("On Track",        "Solid sleep tonight",                "286EF1")
+        else:
+            return ("Fair",            "Could improve consistency",          "F59E0B")
+    elif debt_min < 300:
+        if score >= 3.0:
+            return ("Recovering",      "Good plan to catch up",              "286EF1")
+        else:
+            return ("Slightly Behind", "Try to hit your bedtime tonight",    "F59E0B")
+    elif debt_min < 600:
+        return     ("Catch-Up Needed", "Prioritize sleep this week",         "F59E0B")
+    else:
+        return     ("High Debt",       "Focus on consistent early bedtimes", "EF4444")
+
+
 # ── Pydantic models ────────────────────────────────────────────────────────────
 
 class SleepPreferences(BaseModel):
@@ -135,25 +186,16 @@ class SleepPreferences(BaseModel):
     min_sleep_opportunity_hours: Optional[float] = None
     avoid_high_intensity_near_bed: Optional[bool] = False
     caffeine_cutoff_time: Optional[str] = None
-
-    # General favorites (boosts these categories across all content)
     preferred_categories: Optional[list] = None
-
-    # Time-of-night category preferences:
-    # Stage A = earlier wind-down (plenty of time before bed) → longer, richer content ok
-    # Stage B = last 45 min before bed → short, very gentle only
-    stage_a_categories: Optional[list] = None  # e.g. ["nature", "stories", "music"]
-    stage_b_categories: Optional[list] = None  # e.g. ["asmr", "meditation", "noise"]
-
-    # Per-category weight overrides (only specify what you want to change)
-    # Valid keys: noise, nature, meditation, asmr, stories, music, gentle_movement, other
-    # Values: 0.0–2.0 (default range is 0.85–1.15). Higher = shown more often.
-    category_weights: Optional[dict] = None  # e.g. {"music": 1.20, "asmr": 0.50}
+    stage_a_categories: Optional[list] = None
+    stage_b_categories: Optional[list] = None
+    category_weights: Optional[dict] = None
 
 
 class NapLog(BaseModel):
-    duration_minutes: float         # how long the nap was, e.g. 45.0
-    nap_time: Optional[str] = None  # "14:30" when it started (optional, for display)
+    duration_minutes: float
+    nap_time: Optional[str] = None
+
 
 # ── Routes ─────────────────────────────────────────────────────────────────────
 
@@ -172,10 +214,6 @@ def list_users():
 
 @app.post("/upload/health-data", status_code=201)
 async def upload_health_data(file: UploadFile = File(...)):
-    """
-    Upload Apple Health export.xml.
-    Returns a new user_id — save this in the Swift app for all future calls.
-    """
     if not file.filename.lower().endswith(".xml"):
         raise HTTPException(status_code=400, detail="Please upload an Apple Health export.xml file.")
 
@@ -201,17 +239,9 @@ async def upload_health_data(file: UploadFile = File(...)):
 
 @app.post("/users/{user_id}/preferences")
 def save_preferences(user_id: str, prefs: SleepPreferences):
-    """
-    Save sleep preferences and constraints for this user.
-    
-    stage_a_categories: categories to boost during the early wind-down window
-    stage_b_categories: categories to boost in the last 45 min before bed
-    Both accept any of: noise, nature, meditation, asmr, stories, music, gentle_movement, other
-    """
     assert_user_exists(user_id)
     files = user_files(user_id)
 
-    # Preserve existing profile fields (e.g. n_nights computed by pipeline)
     existing_profile = {}
     if files["sleep_profile"].exists():
         try:
@@ -231,18 +261,16 @@ def save_preferences(user_id: str, prefs: SleepPreferences):
     if prefs.stage_b_categories:
         profile["stage_b_categories"] = prefs.stage_b_categories
     if prefs.category_weights:
-        # Validate values are in a sane range
-        validated = {
+        profile["category_weights"] = {
             k: max(0.0, min(2.0, float(v)))
             for k, v in prefs.category_weights.items()
         }
-        profile["category_weights"] = validated
 
     constraints = {
-        "must_wake_by_min": time_str_to_min(prefs.must_wake_by),
-        "preferred_wake_min": time_str_to_min(prefs.preferred_wake_time),
+        "must_wake_by_min":    time_str_to_min(prefs.must_wake_by),
+        "preferred_wake_min":  time_str_to_min(prefs.preferred_wake_time),
         "hard_constraints": {
-            "no_bed_after_min": time_str_to_min(prefs.no_bed_after),
+            "no_bed_after_min":          time_str_to_min(prefs.no_bed_after),
             "min_sleep_opportunity_min": (
                 int(prefs.min_sleep_opportunity_hours * 60)
                 if prefs.min_sleep_opportunity_hours else None
@@ -250,7 +278,7 @@ def save_preferences(user_id: str, prefs: SleepPreferences):
         },
         "soft_constraints": {
             "avoid_high_intensity_near_bed": prefs.avoid_high_intensity_near_bed or False,
-            "caffeine_cutoff_min": time_str_to_min(prefs.caffeine_cutoff_time),
+            "caffeine_cutoff_min":           time_str_to_min(prefs.caffeine_cutoff_time),
         },
     }
 
@@ -271,14 +299,6 @@ def save_preferences(user_id: str, prefs: SleepPreferences):
 
 @app.post("/users/{user_id}/nap")
 def log_nap(user_id: str, nap: NapLog):
-    """
-    Log a nap taken today.
-    The nap duration is subtracted from tonight's sleep debt so the plan
-    doesn't push an unnecessarily early bedtime after a nap.
-
-    Example: { "duration_minutes": 45, "nap_time": "14:30" }
-    Only one nap per day is stored — logging again overwrites the previous entry.
-    """
     assert_user_exists(user_id)
 
     if nap.duration_minutes <= 0 or nap.duration_minutes > 240:
@@ -286,14 +306,13 @@ def log_nap(user_id: str, nap: NapLog):
             detail="duration_minutes must be between 1 and 240.")
 
     entry = {
-        "date": date.today().isoformat(),
+        "date":             date.today().isoformat(),
         "duration_minutes": nap.duration_minutes,
-        "nap_time": nap.nap_time,
-        "logged_at": datetime.now().isoformat(),
+        "nap_time":         nap.nap_time,
+        "logged_at":        datetime.now().isoformat(),
     }
 
-    nap_path = user_files(user_id)["nap_log"]
-    with open(nap_path, "w") as f:
+    with open(user_files(user_id)["nap_log"], "w") as f:
         json.dump(entry, f, indent=2)
 
     return {
@@ -305,7 +324,6 @@ def log_nap(user_id: str, nap: NapLog):
 
 @app.get("/users/{user_id}/nap")
 def get_nap(user_id: str):
-    """Return today's nap log, or a message if no nap was logged today."""
     assert_user_exists(user_id)
     nap_path = user_files(user_id)["nap_log"]
 
@@ -313,8 +331,6 @@ def get_nap(user_id: str):
         return {"message": "No nap logged today.", "nap": None}
 
     entry = json.loads(nap_path.read_text())
-
-    # Only return if it was logged today
     if entry.get("date") != date.today().isoformat():
         return {"message": "No nap logged today (last log was a previous day).", "nap": None}
 
@@ -325,7 +341,6 @@ def get_nap(user_id: str):
 
 @app.post("/users/{user_id}/run/pipeline")
 def run_pipeline(user_id: str):
-    """Run the full analysis pipeline for this user."""
     assert_user_exists(user_id)
 
     steps = [
@@ -339,18 +354,18 @@ def run_pipeline(user_id: str):
     for label, key in steps:
         res = run_script(SCRIPT_NAMES[key], user_id)
         results.append({
-            "step": label,
+            "step":    label,
             "success": res["returncode"] == 0,
-            "output": res["stdout"] or res["stderr"],
+            "output":  res["stdout"] or res["stderr"],
         })
         if res["returncode"] != 0:
             raise HTTPException(status_code=500,
                 detail=f"Pipeline failed at '{label}': {res['stderr']}")
 
     return {
-        "message": "Pipeline completed successfully.",
-        "user_id": user_id,
-        "steps": results,
+        "message":   "Pipeline completed successfully.",
+        "user_id":   user_id,
+        "steps":     results,
         "timestamp": datetime.now().isoformat(),
     }
 
@@ -381,7 +396,7 @@ def get_sleep_history(user_id: str, days: int = 14):
     df = pd.read_csv(path).sort_values("sleep_date").tail(days)
     return {
         "user_id": user_id,
-        "nights": json.loads(df.where(df.notna(), other=None).to_json(orient="records")),
+        "nights":  json.loads(df.where(df.notna(), other=None).to_json(orient="records")),
     }
 
 
@@ -390,41 +405,29 @@ def get_content_recommendations(user_id: str, limit: int = 10):
     assert_user_exists(user_id)
     data = load_json_file(user_files(user_id)["tonight_content"])
     return {
-        "user_id": user_id,
-        "generated_at": data.get("generated_at"),
-        "context": data.get("context"),
+        "user_id":         user_id,
+        "generated_at":    data.get("generated_at"),
+        "context":         data.get("context"),
         "recommendations": data.get("recommendations", [])[:limit],
     }
 
 
+# ── Bundle endpoints ───────────────────────────────────────────────────────────
+
 @app.post("/users/{user_id}/tonight/bundle")
 def run_and_get_bundle(user_id: str):
-    """
-    Runs plan + content pipeline and returns everything in one response.
-    This is the recommended single call for the Swift home screen.
-    Automatically applies today's nap (if any) to reduce sleep debt.
-    """
+    """Run pipeline + return full enriched bundle."""
     assert_user_exists(user_id)
     res = run_script(SCRIPT_NAMES["bundle"], user_id)
     if res["returncode"] != 0:
         raise HTTPException(status_code=500, detail=f"Bundle failed: {res['stderr']}")
     data = load_json_file(user_files(user_id)["tonight_bundle"])
-    # Inject human-readable time strings into plan if missing
-    if "plan" in data and "bedtime_str" not in data["plan"]:
-        data["plan"]["bedtime_str"] = fmt_time(data["plan"]["bedtime_min"])
-        data["plan"]["wake_str"]    = fmt_time(data["plan"]["wake_min"])
-    data["user_id"] = user_id
-    return data
+    return enrich_bundle(data, user_id)
 
 
 @app.get("/users/{user_id}/tonight/bundle")
 def get_bundle(user_id: str):
-    """Return the last generated bundle without re-running the pipeline."""
+    """Return last generated bundle without re-running pipeline."""
     assert_user_exists(user_id)
     data = load_json_file(user_files(user_id)["tonight_bundle"])
-    # Inject human-readable time strings into plan if missing
-    if "plan" in data and "bedtime_str" not in data["plan"]:
-        data["plan"]["bedtime_str"] = fmt_time(data["plan"]["bedtime_min"])
-        data["plan"]["wake_str"]    = fmt_time(data["plan"]["wake_min"])
-    data["user_id"] = user_id
-    return data
+    return enrich_bundle(data, user_id)
