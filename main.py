@@ -1,41 +1,30 @@
 """
-Sleep Coach API — FastAPI backend (multi-user, v3)
-
-New in v3:
-  - Stage A / Stage B category preferences (time-of-night content tuning)
-  - Nap logging: POST /users/{user_id}/nap — subtracts nap from tonight's sleep debt
-
-Endpoints:
-  POST /upload/health-data                      → Upload XML, returns new user_id
-  POST /users/{user_id}/preferences             → Save sleep preferences & constraints
-  POST /users/{user_id}/nap                     → Log a nap taken today
-  GET  /users/{user_id}/nap                     → Get today's nap log
-  POST /users/{user_id}/run/pipeline            → Run full analysis pipeline
-  GET  /users/{user_id}/sleep/plan              → Get tonight's sleep plan
-  GET  /users/{user_id}/sleep/profile           → Get sleep profile summary
-  GET  /users/{user_id}/sleep/history           → Get nightly sleep history
-  GET  /users/{user_id}/content/recommendations → Get content recommendations
-  POST /users/{user_id}/tonight/bundle          → Run pipeline + return full bundle
-  GET  /users/{user_id}/tonight/bundle          → Get last generated bundle
-  GET  /users                                   → List all user IDs (admin/debug)
-  GET  /health                                  → Health check
+Sleep Coach API — FastAPI backend (v4.2)
+Unified Version: Includes robust background extraction, multi-user support,
+and strict filtering for Apple Health XML exports.
 """
 
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header, Depends, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional
 import json
 import uuid
-import subprocess
-import shutil
 import os
+import shutil
+import subprocess
+import tempfile
+import zipfile
 from pathlib import Path
 from datetime import datetime, date
 import pandas as pd
+import time
+
+# Firebase utilities (Assumed to be in firebase_utils.py)
+import firebase_utils
 
 # ── App setup ──────────────────────────────────────────────────────────────────
-app = FastAPI(title="Sleep Coach API — Multi-User", version="3.0.0")
+app = FastAPI(title="Sleep Coach API — Firestore Backend", version="4.2.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -46,51 +35,60 @@ app.add_middleware(
 )
 
 # ── Directory layout ───────────────────────────────────────────────────────────
-BASE_DIR   = Path(__file__).parent
-USERS_DIR  = BASE_DIR / "data" / "users"
+BASE_DIR = Path(__file__).parent
 SCRIPT_DIR = BASE_DIR / "scripts"
-USERS_DIR.mkdir(parents=True, exist_ok=True)
+# We use a persistent temp area for processing
+TEMP_DIR = Path(tempfile.gettempdir()) / "sleep_coach"
+TEMP_DIR.mkdir(parents=True, exist_ok=True)
 
 SCRIPT_NAMES = {
     "extract": "extract_sleep.py",
     "nightly": "build_sleep_nightly.py",
-    "profile":  "build_sleep_profile.py",
-    "plan":     "make_sleep_plan.py",
-    "content":  "recommend_content.py",
-    "bundle":   "run_tonight.py",
+    "profile": "build_sleep_profile.py",
+    "plan": "make_sleep_plan.py",
+    "content": "recommend_content.py",
+    "bundle": "run_tonight.py",
 }
 
 # ── Per-user helpers ───────────────────────────────────────────────────────────
 
-def user_dir(user_id: str) -> Path:
-    d = USERS_DIR / user_id
+def user_temp_dir(user_id: str) -> Path:
+    d = TEMP_DIR / user_id
     d.mkdir(parents=True, exist_ok=True)
     return d
 
-def user_files(user_id: str) -> dict:
-    d = user_dir(user_id)
+def user_temp_files(user_id: str) -> dict:
+    d = user_temp_dir(user_id)
     return {
-        "export_xml":      d / "export.xml",
-        "sleep_records":   d / "sleep_records.csv",
-        "sleep_nightly":   d / "sleep_index_nightly.csv",
-        "sleep_profile":   d / "sleep_profile.json",
-        "constraints":     d / "tomorrow_constraints.json",
-        "tonight_plan":    d / "tonight_plan.json",
+        "export_xml": d / "export.xml",
+        "sleep_records": d / "sleep_records.csv",
+        "sleep_nightly": d / "sleep_index_nightly.csv",
+        "sleep_profile": d / "sleep_profile.json",
+        "constraints": d / "tomorrow_constraints.json",
+        "tonight_plan": d / "tonight_plan.json",
         "tonight_content": d / "tonight_content.json",
-        "tonight_bundle":  d / "tonight_bundle.json",
-        "nap_log":         d / "nap_log.json",          # ← new
+        "tonight_bundle": d / "tonight_bundle.json",
+        "nap_log": d / "nap_log.json",
     }
 
-def assert_user_exists(user_id: str):
-    if not (USERS_DIR / user_id).exists():
+def assert_user_exists_in_firestore(user_id: str):
+    if not firebase_utils.user_exists_in_firestore(user_id):
         raise HTTPException(status_code=404, detail=f"User '{user_id}' not found.")
+
+def verify_auth_header(authorization: Optional[str] = Header(None)) -> str:
+    try:
+        return firebase_utils.get_user_from_header(authorization)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
 
 def run_script(script_name: str, user_id: str) -> dict:
     script_path = SCRIPT_DIR / script_name
     if not script_path.exists():
         raise HTTPException(status_code=500, detail=f"Script not found: {script_name}")
+    
     env = os.environ.copy()
-    env["USER_DATA_DIR"] = str(user_dir(user_id))
+    env["USER_DATA_DIR"] = str(user_temp_dir(user_id))
+    
     result = subprocess.run(
         ["python3", str(script_path)],
         capture_output=True, text=True,
@@ -102,12 +100,18 @@ def run_script(script_name: str, user_id: str) -> dict:
         "stderr": result.stderr.strip(),
     }
 
-def load_json_file(path: Path) -> dict:
-    if not path.exists():
-        raise HTTPException(status_code=404,
-            detail=f"'{path.name}' not found. Run the pipeline first.")
-    with open(path) as f:
-        return json.load(f)
+def load_temp_json(path: Path) -> dict:
+    if not path.exists(): return {}
+    try:
+        with open(path) as f: return json.load(f)
+    except Exception: return {}
+
+def load_temp_csv_as_json(path: Path) -> list:
+    if not path.exists(): return []
+    try:
+        df = pd.read_csv(path)
+        return json.loads(df.to_json(orient="records"))
+    except Exception: return []
 
 def fmt_time(mins: int) -> str:
     mins = int(mins) % 1440
@@ -117,8 +121,7 @@ def fmt_time(mins: int) -> str:
     return f"{h12}:{m:02d} {ampm}"
 
 def time_str_to_min(t: Optional[str]) -> Optional[int]:
-    if not t:
-        return None
+    if not t: return None
     try:
         h, m = map(int, t.strip().split(":"))
         return h * 60 + m
@@ -135,118 +138,127 @@ class SleepPreferences(BaseModel):
     min_sleep_opportunity_hours: Optional[float] = None
     avoid_high_intensity_near_bed: Optional[bool] = False
     caffeine_cutoff_time: Optional[str] = None
-
-    # General favorites (boosts these categories across all content)
     preferred_categories: Optional[list] = None
-
-    # Time-of-night category preferences:
-    # Stage A = earlier wind-down (plenty of time before bed) → longer, richer content ok
-    # Stage B = last 45 min before bed → short, very gentle only
-    stage_a_categories: Optional[list] = None  # e.g. ["nature", "stories", "music"]
-    stage_b_categories: Optional[list] = None  # e.g. ["asmr", "meditation", "noise"]
-
-    # Per-category weight overrides (only specify what you want to change)
-    # Valid keys: noise, nature, meditation, asmr, stories, music, gentle_movement, other
-    # Values: 0.0–2.0 (default range is 0.85–1.15). Higher = shown more often.
-    category_weights: Optional[dict] = None  # e.g. {"music": 1.20, "asmr": 0.50}
-
+    stage_a_categories: Optional[list] = None
+    stage_b_categories: Optional[list] = None
+    category_weights: Optional[dict] = None
 
 class NapLog(BaseModel):
-    duration_minutes: float         # how long the nap was, e.g. 45.0
-    nap_time: Optional[str] = None  # "14:30" when it started (optional, for display)
+    duration_minutes: float
+    nap_time: Optional[str] = None
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+# ── Background Worker ──────────────────────────────────────────────────────────
+
+def process_extraction_task(user_id: str, zip_path: Path):
+    temp_files = user_temp_files(user_id)
+    firebase_utils.set_processing_status(user_id, "processing")
+    
+    try:
+        def recursive_unzip(current_zip_path, target_output_path):
+            with zipfile.ZipFile(current_zip_path, 'r') as z:
+                # Find the largest .xml that isn't Mac junk
+                candidates = [f for f in z.namelist() 
+                             if f.lower().endswith(".xml") 
+                             and not os.path.basename(f).startswith('.')
+                             and "__macosx" not in f.lower()]
+                time.sleep(2)
+                
+                if not candidates:
+                    return False
+                
+                # Pick the most likely real data
+                best_candidate = max(candidates, key=lambda x: z.getinfo(x).file_size)
+                
+                with z.open(best_candidate) as source, open(target_output_path, "wb") as target:
+                    shutil.copyfileobj(source, target)
+                
+                # NOW CHECK: Did we just extract ANOTHER zip?
+                with open(target_output_path, "rb") as check_f:
+                    header = check_f.read(4)
+                    if header == b"PK\x03\x04":
+                        print(f"🔄 Nested ZIP detected in {best_candidate}! Unzipping again...")
+                        # Recursively handle this new zip
+                        nested_temp = target_output_path.with_suffix(".nested.zip")
+                        target_output_path.rename(nested_temp)
+                        success = recursive_unzip(nested_temp, target_output_path)
+                        nested_temp.unlink()
+                        return success
+                return True
+
+        # Start the process
+        if recursive_unzip(zip_path, temp_files["export_xml"]):
+            print(f"📦 Final XML successfully prepared for {user_id}")
+            
+            # Run the extraction script
+            result = run_script(SCRIPT_NAMES["extract"], user_id)
+            
+            if result["returncode"] == 0:
+                records = load_temp_csv_as_json(temp_files["sleep_records"])
+                firebase_utils.save_sleep_records_csv(user_id, records)
+                firebase_utils.set_processing_status(user_id, "completed")
+                print(f"✅ SUCCESS for {user_id}")
+            else:
+                print(f"❌ Script error: {result['stderr']}")
+                firebase_utils.set_processing_status(user_id, "failed")
+        else:
+            print("❌ No XML found anywhere in the ZIP chain.")
+            firebase_utils.set_processing_status(user_id, "failed")
+            
+    except Exception as e:
+        print(f"❌ Worker error: {e}")
+        firebase_utils.set_processing_status(user_id, "failed")
+    finally:
+        # Cleanup the initial upload
+        if zip_path.exists(): zip_path.unlink()        # ── Routes ─────────────────────────────────────────────────────────────────────
 
 @app.get("/health")
 def health_check():
     return {"status": "ok", "timestamp": datetime.now().isoformat()}
 
-
-@app.get("/users")
-def list_users():
-    ids = [d.name for d in USERS_DIR.iterdir() if d.is_dir()]
-    return {"user_count": len(ids), "user_ids": sorted(ids)}
-
-
-# ── Upload ─────────────────────────────────────────────────────────────────────
-
 @app.post("/upload/health-data", status_code=201)
-async def upload_health_data(file: UploadFile = File(...)):
-    """
-    Upload Apple Health export.xml.
-    Returns a new user_id — save this in the Swift app for all future calls.
-    """
-    if not file.filename.lower().endswith(".xml"):
-        raise HTTPException(status_code=400, detail="Please upload an Apple Health export.xml file.")
+async def upload_health_data(
+    background_tasks: BackgroundTasks, 
+    file: UploadFile = File(...),
+    current_user: str = Depends(verify_auth_header)
+):
+    if not file.filename.lower().endswith(".zip"):
+        raise HTTPException(status_code=400, detail="Please upload a .zip file.")
 
-    user_id = str(uuid.uuid4())
-    files = user_files(user_id)
-
-    with open(files["export_xml"], "wb") as out:
+    user_id = current_user
+    temp_dir = user_temp_dir(user_id)
+    zip_path = temp_dir / f"{uuid.uuid4()}.zip" # Unique name to avoid collisions
+    
+    with open(zip_path, "wb") as out:
         shutil.copyfileobj(file.file, out)
 
-    result = run_script(SCRIPT_NAMES["extract"], user_id)
-    if result["returncode"] != 0:
-        shutil.rmtree(user_dir(user_id), ignore_errors=True)
-        raise HTTPException(status_code=500, detail=f"Extraction failed: {result['stderr']}")
+    firebase_utils.create_firestore_user_doc(user_id)
+    background_tasks.add_task(process_extraction_task, user_id, zip_path)
 
-    return {
-        "user_id": user_id,
-        "message": "Health data uploaded and sleep records extracted.",
-        "next_step": f"POST /users/{user_id}/preferences  →  POST /users/{user_id}/tonight/bundle",
-    }
+    return {"message": "Upload successful. Processing in background."}
 
-
-# ── Preferences ────────────────────────────────────────────────────────────────
+@app.get("/users/{user_id}/status")
+def get_status(user_id: str, current_user: str = Depends(verify_auth_header)):
+    if user_id != current_user: raise HTTPException(status_code=403)
+    return {"status": firebase_utils.get_processing_status(user_id)}
 
 @app.post("/users/{user_id}/preferences")
-def save_preferences(user_id: str, prefs: SleepPreferences):
-    """
-    Save sleep preferences and constraints for this user.
+def save_preferences(user_id: str, prefs: SleepPreferences, current_user: str = Depends(verify_auth_header)):
+    if user_id != current_user: raise HTTPException(status_code=403)
+    assert_user_exists_in_firestore(user_id)
     
-    stage_a_categories: categories to boost during the early wind-down window
-    stage_b_categories: categories to boost in the last 45 min before bed
-    Both accept any of: noise, nature, meditation, asmr, stories, music, gentle_movement, other
-    """
-    assert_user_exists(user_id)
-    files = user_files(user_id)
-
-    # Preserve existing profile fields (e.g. n_nights computed by pipeline)
-    existing_profile = {}
-    if files["sleep_profile"].exists():
-        try:
-            existing_profile = json.loads(files["sleep_profile"].read_text())
-        except Exception:
-            pass
-
-    profile = {
-        **existing_profile,
-        "user_id": user_id,
-        "target_sleep_min": int((prefs.target_sleep_hours or 8.0) * 60),
-    }
-    if prefs.preferred_categories:
-        profile["preferred_categories"] = prefs.preferred_categories
-    if prefs.stage_a_categories:
-        profile["stage_a_categories"] = prefs.stage_a_categories
-    if prefs.stage_b_categories:
-        profile["stage_b_categories"] = prefs.stage_b_categories
-    if prefs.category_weights:
-        # Validate values are in a sane range
-        validated = {
-            k: max(0.0, min(2.0, float(v)))
-            for k, v in prefs.category_weights.items()
-        }
-        profile["category_weights"] = validated
-
+    existing_profile = firebase_utils.get_sleep_profile(user_id)
+    profile = {**existing_profile, "user_id": user_id, "target_sleep_min": int((prefs.target_sleep_hours or 8.0) * 60)}
+    
+    for field in ["preferred_categories", "stage_a_categories", "stage_b_categories"]:
+        val = getattr(prefs, field)
+        if val: profile[field] = val
+        
     constraints = {
         "must_wake_by_min": time_str_to_min(prefs.must_wake_by),
         "preferred_wake_min": time_str_to_min(prefs.preferred_wake_time),
         "hard_constraints": {
             "no_bed_after_min": time_str_to_min(prefs.no_bed_after),
-            "min_sleep_opportunity_min": (
-                int(prefs.min_sleep_opportunity_hours * 60)
-                if prefs.min_sleep_opportunity_hours else None
-            ),
+            "min_sleep_opportunity_min": int(prefs.min_sleep_opportunity_hours * 60) if prefs.min_sleep_opportunity_hours else None,
         },
         "soft_constraints": {
             "avoid_high_intensity_near_bed": prefs.avoid_high_intensity_near_bed or False,
@@ -254,177 +266,53 @@ def save_preferences(user_id: str, prefs: SleepPreferences):
         },
     }
 
-    with open(files["sleep_profile"], "w") as f:
-        json.dump(profile, f, indent=2)
-    with open(files["constraints"], "w") as f:
-        json.dump(constraints, f, indent=2)
-
-    return {
-        "message": "Preferences saved.",
-        "user_id": user_id,
-        "sleep_profile": profile,
-        "constraints": constraints,
-    }
-
-
-# ── Nap logging ────────────────────────────────────────────────────────────────
-
-@app.post("/users/{user_id}/nap")
-def log_nap(user_id: str, nap: NapLog):
-    """
-    Log a nap taken today.
-    The nap duration is subtracted from tonight's sleep debt so the plan
-    doesn't push an unnecessarily early bedtime after a nap.
-
-    Example: { "duration_minutes": 45, "nap_time": "14:30" }
-    Only one nap per day is stored — logging again overwrites the previous entry.
-    """
-    assert_user_exists(user_id)
-
-    if nap.duration_minutes <= 0 or nap.duration_minutes > 240:
-        raise HTTPException(status_code=422,
-            detail="duration_minutes must be between 1 and 240.")
-
-    entry = {
-        "date": date.today().isoformat(),
-        "duration_minutes": nap.duration_minutes,
-        "nap_time": nap.nap_time,
-        "logged_at": datetime.now().isoformat(),
-    }
-
-    nap_path = user_files(user_id)["nap_log"]
-    with open(nap_path, "w") as f:
-        json.dump(entry, f, indent=2)
-
-    return {
-        "message": f"Nap of {nap.duration_minutes} min logged. "
-                   f"Tonight's sleep debt will be reduced by this amount.",
-        "nap": entry,
-    }
-
-
-@app.get("/users/{user_id}/nap")
-def get_nap(user_id: str):
-    """Return today's nap log, or a message if no nap was logged today."""
-    assert_user_exists(user_id)
-    nap_path = user_files(user_id)["nap_log"]
-
-    if not nap_path.exists():
-        return {"message": "No nap logged today.", "nap": None}
-
-    entry = json.loads(nap_path.read_text())
-
-    # Only return if it was logged today
-    if entry.get("date") != date.today().isoformat():
-        return {"message": "No nap logged today (last log was a previous day).", "nap": None}
-
-    return {"nap": entry}
-
-
-# ── Pipeline ───────────────────────────────────────────────────────────────────
-
-@app.post("/users/{user_id}/run/pipeline")
-def run_pipeline(user_id: str):
-    """Run the full analysis pipeline for this user."""
-    assert_user_exists(user_id)
-
-    steps = [
-        ("nightly index",           "nightly"),
-        ("sleep profile",           "profile"),
-        ("tonight's plan",          "plan"),
-        ("content recommendations", "content"),
-    ]
-
-    results = []
-    for label, key in steps:
-        res = run_script(SCRIPT_NAMES[key], user_id)
-        results.append({
-            "step": label,
-            "success": res["returncode"] == 0,
-            "output": res["stdout"] or res["stderr"],
-        })
-        if res["returncode"] != 0:
-            raise HTTPException(status_code=500,
-                detail=f"Pipeline failed at '{label}': {res['stderr']}")
-
-    return {
-        "message": "Pipeline completed successfully.",
-        "user_id": user_id,
-        "steps": results,
-        "timestamp": datetime.now().isoformat(),
-    }
-
-
-# ── Read endpoints ─────────────────────────────────────────────────────────────
-
-@app.get("/users/{user_id}/sleep/plan")
-def get_sleep_plan(user_id: str):
-    assert_user_exists(user_id)
-    plan = load_json_file(user_files(user_id)["tonight_plan"])
-    plan["bedtime_str"] = fmt_time(plan.get("bedtime_min", 0))
-    plan["wake_str"]    = fmt_time(plan.get("wake_min", 0))
-    return plan
-
-
-@app.get("/users/{user_id}/sleep/profile")
-def get_sleep_profile(user_id: str):
-    assert_user_exists(user_id)
-    return load_json_file(user_files(user_id)["sleep_profile"])
-
-
-@app.get("/users/{user_id}/sleep/history")
-def get_sleep_history(user_id: str, days: int = 14):
-    assert_user_exists(user_id)
-    path = user_files(user_id)["sleep_nightly"]
-    if not path.exists():
-        raise HTTPException(status_code=404, detail="No nightly data yet. Run the pipeline first.")
-    df = pd.read_csv(path).sort_values("sleep_date").tail(days)
-    return {
-        "user_id": user_id,
-        "nights": json.loads(df.where(df.notna(), other=None).to_json(orient="records")),
-    }
-
-
-@app.get("/users/{user_id}/content/recommendations")
-def get_content_recommendations(user_id: str, limit: int = 10):
-    assert_user_exists(user_id)
-    data = load_json_file(user_files(user_id)["tonight_content"])
-    return {
-        "user_id": user_id,
-        "generated_at": data.get("generated_at"),
-        "context": data.get("context"),
-        "recommendations": data.get("recommendations", [])[:limit],
-    }
-
+    firebase_utils.save_sleep_profile(user_id, profile)
+    firebase_utils.save_user_constraints(user_id, constraints)
+    return {"message": "Preferences saved."}
 
 @app.post("/users/{user_id}/tonight/bundle")
-def run_and_get_bundle(user_id: str):
-    """
-    Runs plan + content pipeline and returns everything in one response.
-    This is the recommended single call for the Swift home screen.
-    Automatically applies today's nap (if any) to reduce sleep debt.
-    """
-    assert_user_exists(user_id)
-    res = run_script(SCRIPT_NAMES["bundle"], user_id)
-    if res["returncode"] != 0:
-        raise HTTPException(status_code=500, detail=f"Bundle failed: {res['stderr']}")
-    data = load_json_file(user_files(user_id)["tonight_bundle"])
-    # Inject human-readable time strings into plan if missing
-    if "plan" in data and "bedtime_str" not in data["plan"]:
-        data["plan"]["bedtime_str"] = fmt_time(data["plan"]["bedtime_min"])
-        data["plan"]["wake_str"]    = fmt_time(data["plan"]["wake_min"])
-    data["user_id"] = user_id
-    return data
+def run_and_get_bundle(user_id: str, current_user: str = Depends(verify_auth_header)):
+    if user_id != current_user: raise HTTPException(status_code=403)
+    assert_user_exists_in_firestore(user_id)
+    temp_files = user_temp_files(user_id)
 
+    try:
+        # Hydrate temp folder from Firestore
+        records = firebase_utils.get_sleep_records_csv(user_id)
+        if not records:
+            raise HTTPException(status_code=400, detail="No sleep records found. Please upload health data first.")
+        
+        pd.DataFrame(records).to_csv(temp_files["sleep_records"], index=False)
+        
+        for key, func in [("sleep_profile", firebase_utils.get_sleep_profile), 
+                         ("constraints", firebase_utils.get_user_constraints),
+                         ("nap_log", firebase_utils.get_nap_log)]:
+            with open(temp_files[key], "w") as f: json.dump(func(user_id), f)
+
+        res = run_script(SCRIPT_NAMES["bundle"], user_id)
+        if res["returncode"] != 0: raise HTTPException(status_code=500, detail=res["stderr"])
+        
+        data = load_temp_json(temp_files["tonight_bundle"])
+        if "plan" in data:
+            data["plan"]["bedtime_str"] = fmt_time(data["plan"].get("bedtime_min", 0))
+            data["plan"]["wake_str"] = fmt_time(data["plan"].get("wake_min", 0))
+        
+        firebase_utils.save_tonight_bundle(user_id, data)
+        return data
+    finally:
+        shutil.rmtree(user_temp_dir(user_id), ignore_errors=True)
 
 @app.get("/users/{user_id}/tonight/bundle")
-def get_bundle(user_id: str):
-    """Return the last generated bundle without re-running the pipeline."""
-    assert_user_exists(user_id)
-    data = load_json_file(user_files(user_id)["tonight_bundle"])
-    # Inject human-readable time strings into plan if missing
-    if "plan" in data and "bedtime_str" not in data["plan"]:
-        data["plan"]["bedtime_str"] = fmt_time(data["plan"]["bedtime_min"])
-        data["plan"]["wake_str"]    = fmt_time(data["plan"]["wake_min"])
-    data["user_id"] = user_id
+def get_bundle(user_id: str, current_user: str = Depends(verify_auth_header)):
+    if user_id != current_user: raise HTTPException(status_code=403)
+    data = firebase_utils.get_tonight_bundle(user_id)
+    if not data: raise HTTPException(status_code=404)
     return data
+
+@app.get("/users/{user_id}/sleep/history")
+def get_sleep_history(user_id: str, days: int = 14, current_user: str = Depends(verify_auth_header)):
+    if user_id != current_user: raise HTTPException(status_code=403)
+    records = firebase_utils.get_sleep_nightly(user_id)
+    if not records: return {"nights": []}
+    df = pd.DataFrame(records).sort_values("sleep_date", errors="ignore").tail(days)
+    return {"nights": json.loads(df.to_json(orient="records"))}

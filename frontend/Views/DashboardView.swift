@@ -1,15 +1,30 @@
 import SwiftUI
 
 struct DashboardView: View {
-    @Environment(SleepAPIManager.self) var api
+    @EnvironmentObject var api: SleepAPIManager
 
     @State private var bundle: TonightBundle?
     @State private var isLoading = true
     @State private var errorMessage: String?
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
+        if !api.isEmailVerified {
+            VStack(spacing: 24) {
+                Image(systemName: "envelope.badge")
+                    .font(.system(size: 48))
+                    .foregroundColor(Color(hex: "286EF1"))
+                Text("Please verify your email to access your dashboard.")
+                    .font(.system(size: 18, weight: .semibold))
+                    .multilineTextAlignment(.center)
+                Button("Resend Verification Email") {
+                    api.sendEmailVerification()
+                }
+                .padding(.top, 8)
+            }
+            .padding(40)
+        } else {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
                 // Header
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
@@ -52,9 +67,10 @@ struct DashboardView: View {
             }
             .padding(24)
         }
-        .background(Color(hex: "E8EEF5"))
-        .navigationBarBackButtonHidden(true)
-        .task { await loadBundle() }
+            .background(Color(hex: "E8EEF5"))
+            .navigationBarBackButtonHidden(true)
+            .task { await loadBundle() }
+        }
     }
 
     // MARK: - Main content

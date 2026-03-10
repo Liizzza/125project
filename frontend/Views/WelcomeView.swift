@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct WelcomeView: View {
+    @ObservedObject var firebaseAuth: FirebaseAuthManager
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -34,7 +36,7 @@ struct WelcomeView: View {
                 .padding(.horizontal, 24)
                 .padding(.bottom, 40)
 
-                NavigationLink(destination: LoginView()) {
+                NavigationLink(destination: LoginView(firebaseAuth: firebaseAuth)) {
                     Text("Login / Sign Up")
                         .font(.system(size: 16, weight: .semibold))
                         .foregroundColor(.white)

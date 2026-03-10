@@ -2,7 +2,7 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct UploadView: View {
-    @Environment(SleepAPIManager.self) var api
+    @EnvironmentObject var api: SleepAPIManager
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedFile: URL?
@@ -12,6 +12,18 @@ struct UploadView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
+            if !api.isEmailVerified {
+                HStack {
+                    Image(systemName: "envelope.badge")
+                        .foregroundColor(.orange)
+                    Text("Please verify your email to upload data.")
+                        .font(.system(size: 14, weight: .semibold))
+                }
+                .padding(12)
+                .background(Color.yellow.opacity(0.2))
+                .cornerRadius(8)
+                .padding(.bottom, 12)
+            }
             // Header
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.left")
@@ -74,7 +86,7 @@ struct UploadView: View {
                     : Color(hex: "ADB5BD"))
                 .clipShape(RoundedRectangle(cornerRadius: 25))
             }
-            .disabled(selectedFile == nil || isUploading)
+            .disabled(selectedFile == nil || isUploading || !api.isEmailVerified)
 
 
         }
@@ -88,6 +100,7 @@ struct UploadView: View {
     }
 
     private func handleUpload() {
+        guard api.isEmailVerified else { return }
         guard let fileURL = selectedFile else { return }
         isUploading = true
         uploadError = nil
@@ -95,6 +108,7 @@ struct UploadView: View {
         Task {
             do {
                 try await api.uploadHealthData(fileURL: fileURL)
+                await api.checkUserDataExists() // Update user data state after upload
                 navigateToPreferences = true
             } catch {
                 uploadError = error.localizedDescription

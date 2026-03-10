@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6EFE1C1A2F5B8B49003353BC /* SleepAPIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C0E2F5B8B49003353BC /* SleepAPIManager.swift */; };
 		6EFE1C1B2F5B8B49003353BC /* WelcomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C142F5B8B49003353BC /* WelcomeView.swift */; };
 		6EFE1C1C2F5B8B49003353BC /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C102F5B8B49003353BC /* DashboardView.swift */; };
 		6EFE1C1D2F5B8B49003353BC /* SleepOptimizedApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C182F5B8B49003353BC /* SleepOptimizedApp.swift */; };
@@ -17,12 +16,18 @@
 		6EFE1C212F5B8B49003353BC /* UploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C132F5B8B49003353BC /* UploadView.swift */; };
 		6EFE1C222F5B8B49003353BC /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EFE1C0B2F5B8B49003353BC /* Color+Hex.swift */; };
 		6EFE1C242F5B8B49003353BC /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = 6EFE1C172F5B8B49003353BC /* README.md */; };
+		8B47A1D52F602F5400482E0C /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 8B47A1D42F602F5400482E0C /* ZIPFoundation */; };
+		8B60C4B22F5D6DED00240341 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 8B60C4B12F5D6DED00240341 /* GoogleService-Info.plist */; };
+		8B60C4B42F5D720A00240341 /* FirebaseAuthManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B60C4B32F5D720900240341 /* FirebaseAuthManager.swift */; };
+		8B71ECD42F60027A00B709AD /* SleepAPIManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B71ECD32F60027A00B709AD /* SleepAPIManager.swift */; };
+		8BA1D2E82F5FE95400EB9C04 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 8BA1D2E72F5FE95400EB9C04 /* FirebaseAuth */; };
+		8BA1D2EA2F5FE95400EB9C04 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 8BA1D2E92F5FE95400EB9C04 /* FirebaseCore */; };
+		8BA1D2EC2F5FE95400EB9C04 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 8BA1D2EB2F5FE95400EB9C04 /* FirebaseFirestore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		6EFE1C0B2F5B8B49003353BC /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		6EFE1C0D2F5B8B49003353BC /* DocumentPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentPicker.swift; sourceTree = "<group>"; };
-		6EFE1C0E2F5B8B49003353BC /* SleepAPIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepAPIManager.swift; sourceTree = "<group>"; };
 		6EFE1C102F5B8B49003353BC /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		6EFE1C112F5B8B49003353BC /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		6EFE1C122F5B8B49003353BC /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
@@ -30,22 +35,21 @@
 		6EFE1C142F5B8B49003353BC /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		6EFE1C172F5B8B49003353BC /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		6EFE1C182F5B8B49003353BC /* SleepOptimizedApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepOptimizedApp.swift; sourceTree = "<group>"; };
+		8B60C4B12F5D6DED00240341 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		8B60C4B32F5D720900240341 /* FirebaseAuthManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseAuthManager.swift; sourceTree = "<group>"; };
+		8B71ECD32F60027A00B709AD /* SleepAPIManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepAPIManager.swift; sourceTree = "<group>"; };
 		CBEF57132F4D2666005ECD58 /* SleepOptimized.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SleepOptimized.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		CBEF57432F4D26FE005ECD58 /* SleepOptimized 2 */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "SleepOptimized 2";
-			sourceTree = "<group>";
-		};
-/* End PBXFileSystemSynchronizedRootGroup section */
-
 /* Begin PBXFrameworksBuildPhase section */
-		CBEF57102F4D2666005ECD58 /* Frameworks */ = {
+		E3250A6D9861E28E65233CD4 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8BA1D2EC2F5FE95400EB9C04 /* FirebaseFirestore in Frameworks */,
+				8BA1D2EA2F5FE95400EB9C04 /* FirebaseCore in Frameworks */,
+				8BA1D2E82F5FE95400EB9C04 /* FirebaseAuth in Frameworks */,
+				8B47A1D52F602F5400482E0C /* ZIPFoundation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -63,8 +67,9 @@
 		6EFE1C0F2F5B8B49003353BC /* Utilities */ = {
 			isa = PBXGroup;
 			children = (
+				8B60C4B32F5D720900240341 /* FirebaseAuthManager.swift */,
 				6EFE1C0D2F5B8B49003353BC /* DocumentPicker.swift */,
-				6EFE1C0E2F5B8B49003353BC /* SleepAPIManager.swift */,
+				8B71ECD32F60027A00B709AD /* SleepAPIManager.swift */,
 			);
 			path = Utilities;
 			sourceTree = "<group>";
@@ -92,12 +97,12 @@
 		CBEF570A2F4D2666005ECD58 = {
 			isa = PBXGroup;
 			children = (
+				8B60C4B12F5D6DED00240341 /* GoogleService-Info.plist */,
 				6EFE1C182F5B8B49003353BC /* SleepOptimizedApp.swift */,
 				6EFE1C0F2F5B8B49003353BC /* Utilities */,
 				6EFE1C152F5B8B49003353BC /* Views */,
 				6EFE1C0C2F5B8B49003353BC /* Extensions */,
 				6EFE1C192F5B8B49003353BC /* SleepOptimized */,
-				CBEF57432F4D26FE005ECD58 /* SleepOptimized 2 */,
 				CBEF57142F4D2666005ECD58 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -118,19 +123,14 @@
 			buildConfigurationList = CBEF571E2F4D2668005ECD58 /* Build configuration list for PBXNativeTarget "SleepOptimized" */;
 			buildPhases = (
 				CBEF570F2F4D2666005ECD58 /* Sources */,
-				CBEF57102F4D2666005ECD58 /* Frameworks */,
 				CBEF57112F4D2666005ECD58 /* Resources */,
+				E3250A6D9861E28E65233CD4 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			fileSystemSynchronizedGroups = (
-				CBEF57432F4D26FE005ECD58 /* SleepOptimized 2 */,
-			);
 			name = SleepOptimized;
-			packageProductDependencies = (
-			);
 			productName = SleepOptimized;
 			productReference = CBEF57132F4D2666005ECD58 /* SleepOptimized.app */;
 			productType = "com.apple.product-type.application";
@@ -159,6 +159,10 @@
 			);
 			mainGroup = CBEF570A2F4D2666005ECD58;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8BA1D2E62F5FE95400EB9C04 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				8B47A1D32F602F5400482E0C /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = CBEF57142F4D2666005ECD58 /* Products */;
 			projectDirPath = "";
@@ -175,6 +179,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6EFE1C242F5B8B49003353BC /* README.md in Resources */,
+				8B60C4B22F5D6DED00240341 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -185,10 +190,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6EFE1C1A2F5B8B49003353BC /* SleepAPIManager.swift in Sources */,
 				6EFE1C1B2F5B8B49003353BC /* WelcomeView.swift in Sources */,
+				8B71ECD42F60027A00B709AD /* SleepAPIManager.swift in Sources */,
 				6EFE1C1C2F5B8B49003353BC /* DashboardView.swift in Sources */,
 				6EFE1C1D2F5B8B49003353BC /* SleepOptimizedApp.swift in Sources */,
+				8B60C4B42F5D720A00240341 /* FirebaseAuthManager.swift in Sources */,
 				6EFE1C1E2F5B8B49003353BC /* LoginView.swift in Sources */,
 				6EFE1C1F2F5B8B49003353BC /* PreferencesView.swift in Sources */,
 				6EFE1C202F5B8B49003353BC /* DocumentPicker.swift in Sources */,
@@ -330,12 +336,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3DH3HLG5HY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SleepOptimized/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -344,7 +352,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				NEW_SETTING = "";
-				PRODUCT_BUNDLE_IDENTIFIER = liza.SleepOptimized;
+				PRODUCT_BUNDLE_IDENTIFIER = com.liza.SleepOptimized;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -363,13 +371,14 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 4L64F2P743;
+				DEVELOPMENT_TEAM = 3DH3HLG5HY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SleepOptimized/Info.plist;
+				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -378,7 +387,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				NEW_SETTING = "";
-				PRODUCT_BUNDLE_IDENTIFIER = liza.SleepOptimized;
+				PRODUCT_BUNDLE_IDENTIFIER = com.liza.SleepOptimized;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -412,6 +421,48 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8B47A1D32F602F5400482E0C /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/weichsel/ZIPFoundation.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.9.20;
+			};
+		};
+		8BA1D2E62F5FE95400EB9C04 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.10.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8B47A1D42F602F5400482E0C /* ZIPFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8B47A1D32F602F5400482E0C /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
+			productName = ZIPFoundation;
+		};
+		8BA1D2E72F5FE95400EB9C04 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BA1D2E62F5FE95400EB9C04 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		8BA1D2E92F5FE95400EB9C04 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BA1D2E62F5FE95400EB9C04 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		8BA1D2EB2F5FE95400EB9C04 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8BA1D2E62F5FE95400EB9C04 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = CBEF570B2F4D2666005ECD58 /* Project object */;
 }

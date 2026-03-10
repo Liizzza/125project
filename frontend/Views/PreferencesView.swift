@@ -1,7 +1,51 @@
 import SwiftUI
 
 struct PreferencesView: View {
-    @Environment(SleepAPIManager.self) var api
+    // MARK: - Helpers must be in struct scope for SwiftUI
+    func handleGenerate() {
+        isSaving = true
+        saveError = nil
+
+        let prefs = SleepPreferencesRequest(
+            targetSleepHours: targetSleepHours,
+            mustWakeBy: timeString(from: mustWakeBy),
+            preferredWakeTime: timeString(from: preferredWakeTime),
+            noBedAfter: timeString(from: noBedAfter),
+            avoidHighIntensityNearBed: avoidHighIntensityNearBed,
+            caffeineCutoffTime: hadCaffeineToday ? timeString(from: caffeineCutoffTime) : nil,
+            stageACategories: Array(selectedStageACategories),
+            stageBCategories: Array(selectedStageBCategories)
+        )
+
+        Task {
+            do {
+                // 1. Save the preferences to the server
+                try await api.savePreferences(prefs)
+                
+                // 2. Tell the server to start the processing run
+                try await api.runAndGetBundle() 
+                
+                // 3. RETRY LOGIC: Wait for the background worker to finish
+                // This prevents the 404 error by checking every few seconds
+                print("⏳ Starting retry loop to wait for data processing...")
+                _ = try await api.getBundleWithRetry() 
+                
+                // 4. Success! Now we can safely navigate
+                navigateToDashboard = true
+            } catch {
+                print("❌ Error during generation: \(error.localizedDescription)")
+                saveError = "Processing took too long or failed. Please try again."
+            }
+            isSaving = false
+        }
+    }
+
+    func timeString(from date: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "HH:mm"
+        return f.string(from: date)
+    }
+    @EnvironmentObject var api: SleepAPIManager
     @Environment(\.dismiss) private var dismiss
 
     // Schedule
@@ -31,8 +75,26 @@ struct PreferencesView: View {
     let allCategories = ["noise", "nature", "meditation", "asmr", "stories", "music", "gentle_movement"]
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
+        if !api.isEmailVerified {
+            VStack(spacing: 24) {
+                Image(systemName: "envelope.badge")
+                    .font(.system(size: 48))
+                    .foregroundColor(Color(hex: "286EF1"))
+                Text("Please verify your email to set preferences.")
+                    .font(.system(size: 18, weight: .semibold))
+                    .multilineTextAlignment(.center)
+                Button("Resend Verification Email") {
+                    api.sendEmailVerification { error in
+                        if let error = error {
+                            print("Verification error: \(error.localizedDescription)")
+                        }
+                    }                }
+                .padding(.top, 8)
+            }
+            .padding(40)
+        } else {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
                 // Header
                 Button(action: { dismiss() }) {
                     Image(systemName: "chevron.left")
@@ -149,7 +211,7 @@ struct PreferencesView: View {
                     .background(isSaving ? Color(hex: "ADB5BD") : Color(hex: "286EF1"))
                     .clipShape(RoundedRectangle(cornerRadius: 25))
                 }
-                .disabled(isSaving)
+                .disabled(isSaving || (api != nil && !api.isEmailVerified))
 
             }
             .padding(24)
@@ -162,38 +224,9 @@ struct PreferencesView: View {
         }
     }
 
-    private func handleGenerate() {
-        isSaving = true
-        saveError = nil
+    // ...existing code...
+}
 
-        let prefs = SleepPreferencesRequest(
-            targetSleepHours: targetSleepHours,
-            mustWakeBy: timeString(from: mustWakeBy),
-            preferredWakeTime: timeString(from: preferredWakeTime),
-            noBedAfter: timeString(from: noBedAfter),
-            avoidHighIntensityNearBed: avoidHighIntensityNearBed,
-            caffeineCutoffTime: hadCaffeineToday ? timeString(from: caffeineCutoffTime) : nil,
-            stageACategories: Array(selectedStageACategories),
-            stageBCategories: Array(selectedStageBCategories)
-        )
-
-        Task {
-            do {
-                try await api.savePreferences(prefs)
-                _ = try await api.runAndGetBundle()
-                navigateToDashboard = true  // always push/replace with fresh dashboard
-            } catch {
-                saveError = error.localizedDescription
-            }
-            isSaving = false
-        }
-    }
-
-    private func timeString(from date: Date) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return f.string(from: date)
-    }
 }
 
 // MARK: - Sub-components

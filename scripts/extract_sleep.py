@@ -14,6 +14,7 @@ SLEEP_TYPE = "HKCategoryTypeIdentifierSleepAnalysis"
 
 
 def main():
+    print(f"DEBUG: Reading from {INPUT_XML}")
     with open(OUT_CSV, "w", newline="") as f:
         writer = csv.DictWriter(
             f,

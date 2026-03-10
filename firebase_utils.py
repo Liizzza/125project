@@ -174,12 +174,41 @@ def get_health_export_xml(user_id: str) -> Optional[str]:
     except: return None
 
 # ── Sleep Records ─────────────────────────────────────────────────────────────
+def save_sleep_records_csv(user_id, records):
+    # Use the 'db' variable defined at the top of your file
+    # Reference to a sub-collection for this specific user
+    user_sleep_ref = db.collection("users").document(user_id).collection("sleep_records")
+    
+    # 1. Clear old records first (so we don't have duplicates)
+    # This is optional but keeps your database clean
+    docs = user_sleep_ref.list_documents(page_size=100)
+    for doc in docs:
+        doc.delete()
 
-def save_sleep_records_csv(user_id: str, csv_data: list):
-    db.collection("users").document(user_id).collection("data").document("sleep_records").set({
-        "records": csv_data, "updated_at": datetime.now(),
-    })
+    # 2. Use Batches for the 4.7MB of data
+    batch = db.batch()
+    count = 0
+    
+    for record in records:
+        new_doc_ref = user_sleep_ref.document()
+        batch.set(new_doc_ref, record)
+        count += 1
+        
+        # Firestore batch limit is 500
+        if count >= 400: 
+            batch.commit()
+            batch = db.batch()
+            count = 0
+            
+    batch.commit()
+    print(f"✅ Saved {len(records)} records to sub-collection for {user_id}")
 
 def get_sleep_records_csv(user_id: str) -> list:
-    doc = db.collection("users").document(user_id).collection("data").document("sleep_records").get()
-    return doc.to_dict().get("records", []) if doc.exists else []
+    # 1. Point to the collection, not a specific document
+    records_ref = db.collection("users").document(user_id).collection("sleep_records")
+    
+    # 2. Stream all documents in that collection
+    docs = records_ref.stream()
+    
+    # 3. Convert each document back into a dictionary and return the list
+    return [doc.to_dict() for doc in docs]
