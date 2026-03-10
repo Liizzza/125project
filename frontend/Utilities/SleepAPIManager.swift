@@ -1,4 +1,8 @@
 import Foundation
+import FirebaseAuth
+import FirebaseFirestore
+import Combine
+import ZIPFoundation
 
 // MARK: - Response Models
 
@@ -119,32 +123,63 @@ enum APIError: LocalizedError {
 
 // MARK: - SleepAPIManager
 
-@MainActor
-@Observable
-class SleepAPIManager {
+
+class SleepAPIManager: ObservableObject {
 
     // Change to your Mac's local IP when running on a real device
-    static let BASE_URL = "http://10.10.231.93:8000"
+    static let BASE_URL = "http://127.0.0.1:8000"
 
-    var userId: String? {
-        didSet { UserDefaults.standard.set(userId, forKey: "sleep_user_id") }
-    }
-    var isLoading = false
-    var errorMessage: String?
 
-    init() {
+    var firebaseAuth: FirebaseAuthManager
+    @Published var userId: String?
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    init(firebaseAuth: FirebaseAuthManager) {
+        self.firebaseAuth = firebaseAuth
         self.userId = UserDefaults.standard.string(forKey: "sleep_user_id")
     }
 
+    private func persistUserId() {
+        UserDefaults.standard.set(userId, forKey: "sleep_user_id")
+    }
+
+
     var hasUser: Bool { userId != nil }
+    @Published var hasUserData: Bool = false
+
+    // Email verification enforcement
+    var isEmailVerified: Bool {
+        guard let user = firebaseAuth.user else { return false }
+        return user.isEmailVerified
+    }
+
+    func sendEmailVerification(completion: ((Error?) -> Void)? = nil) {
+        firebaseAuth.user?.sendEmailVerification(completion: completion)
+    }
 
     private func request<T: Decodable>(path: String, method: String = "GET", body: Data? = nil) async throws -> T {
         guard let url = URL(string: Self.BASE_URL + path) else { throw APIError.invalidURL }
         var req = URLRequest(url: url)
         req.httpMethod = method
-        if let body { req.setValue("application/json", forHTTPHeaderField: "Content-Type"); req.httpBody = body }
+        
+        // Add Firebase ID token to Authorization header
+        if let token = firebaseAuth.idToken {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        if let body { 
+            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            req.httpBody = body 
+        }
         let (data, response) = try await URLSession.shared.data(for: req)
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+            if http.statusCode == 401 {
+                // Token expired or invalid, refresh it using manager
+                await firebaseAuth.refreshToken()
+                // Retry the request
+                return try await request(path: path, method: method, body: body)
+            }
             throw APIError.serverError(http.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
         }
         do {
@@ -165,39 +200,102 @@ class SleepAPIManager {
         return "/users/\(uid)\(suffix)"
     }
 
+
     func uploadHealthData(fileURL: URL) async throws {
+        guard let uid = firebaseAuth.user?.uid else { throw APIError.noUserId }
         guard let url = URL(string: Self.BASE_URL + "/upload/health-data") else { throw APIError.invalidURL }
-        let fileData = try Data(contentsOf: fileURL)
-        let boundary = UUID().uuidString
+        
+        let fileManager = FileManager.default
+        let tempDir = fileManager.temporaryDirectory
+        
+        // 1. Create the ZIP
+        let zipURL = tempDir.appendingPathComponent("export.zip")
+        if fileManager.fileExists(atPath: zipURL.path) { try? fileManager.removeItem(at: zipURL) }
+        
+        guard let archive = Archive(url: zipURL, accessMode: .create) else {
+            throw APIError.decodingError("Could not create ZIP archive")
+        }
+        try archive.addEntry(with: "export.xml", fileURL: fileURL)
+        
+        // 2. Prepare the Request
+        let boundary = "Boundary-\(UUID().uuidString)"
         var req = URLRequest(url: url)
         req.httpMethod = "POST"
         req.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        var body = Data()
-        body.append("--\(boundary)\r\n".data(using: .utf8)!)
-        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"export.xml\"\r\n".data(using: .utf8)!)
-        body.append("Content-Type: text/xml\r\n\r\n".data(using: .utf8)!)
-        body.append(fileData)
-        body.append("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
-        req.httpBody = body
-        let (data, response) = try await URLSession.shared.data(for: req)
+        req.timeoutInterval = 600 
+        
+        if let token = firebaseAuth.idToken {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+
+        // 3. FULL DISK STREAM: Combine everything into one temp file
+        let combinedUploadURL = tempDir.appendingPathComponent("final_upload.tmp")
+        if fileManager.fileExists(atPath: combinedUploadURL.path) { try? fileManager.removeItem(at: combinedUploadURL) }
+        
+        // Create the file
+        fileManager.createFile(atPath: combinedUploadURL.path, contents: nil)
+        let handle = try FileHandle(forWritingTo: combinedUploadURL)
+        
+        // Write Header
+        let header = "--\(boundary)\r\nContent-Disposition: form-data; name=\"file\"; filename=\"export.zip\"\r\nContent-Type: application/zip\r\n\r\n"
+        handle.write(header.data(using: .utf8)!)
+        
+        // Write ZIP content piece-by-piece (Stream from disk to disk)
+        let zipHandle = try FileHandle(forReadingFrom: zipURL)
+        while let chunk = try zipHandle.read(upToCount: 1024 * 1024) { // 1MB chunks
+            handle.write(chunk)
+        }
+        try zipHandle.close()
+        
+        // Write Footer
+        handle.write("\r\n--\(boundary)--\r\n".data(using: .utf8)!)
+        try handle.close()
+
+        // 4. Custom Session for long uploads
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForResource = 1200 
+        let session = URLSession(configuration: config)
+
+        // 5. Upload the COMBINED file
+        print("🚀 Starting upload of streamed file...")
+        let (data, response) = try await session.upload(for: req, fromFile: combinedUploadURL)
+        print("✅ Server responded!")
+
+        // 6. Cleanup
+        try? fileManager.removeItem(at: zipURL)
+        try? fileManager.removeItem(at: combinedUploadURL)
+
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
             throw APIError.serverError(http.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
         }
+        
         let result = try JSONDecoder().decode(UploadResponse.self, from: data)
-        self.userId = result.userId
+        await MainActor.run {
+            self.userId = uid
+            persistUserId()
+        }
     }
 
     func savePreferences(_ prefs: SleepPreferencesRequest) async throws {
         let path = try userPath("/preferences")
         let body = try JSONEncoder().encode(prefs)
-        let (data, response) = try await URLSession.shared.data(for: {
-            var req = URLRequest(url: URL(string: Self.BASE_URL + path)!)
-            req.httpMethod = "POST"
-            req.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            req.httpBody = body
-            return req
-        }())
+        guard let url = URL(string: Self.BASE_URL + path) else { throw APIError.invalidURL }
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // Add Firebase ID token
+        if let token = firebaseAuth.idToken {
+            req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        }
+        
+        req.httpBody = body
+        let (data, response) = try await URLSession.shared.data(for: req)
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+            if http.statusCode == 401 {
+                _ = try await firebaseAuth.user?.getIDToken(forcingRefresh: true)
+                return try await savePreferences(prefs)
+            }
             throw APIError.serverError(http.statusCode, String(data: data, encoding: .utf8) ?? "Unknown")
         }
         // ignore response body
@@ -214,5 +312,45 @@ class SleepAPIManager {
     func clearUser() {
         userId = nil
         UserDefaults.standard.removeObject(forKey: "sleep_user_id")
+        firebaseAuth.signOut()
+    }
+
+    func checkUserDataExists() async {
+        guard let uid = firebaseAuth.user?.uid else {
+            await MainActor.run { hasUserData = false }
+            return
+        }
+        
+        let db = Firestore.firestore()
+        // Look for the extracted records, as the raw XML is no longer stored
+        let docRef = db.collection("users").document(uid).collection("data").document("sleep_records")
+        
+        do {
+            let doc = try await docRef.getDocument()
+            await MainActor.run {
+                self.hasUserData = doc.exists
+            }
+        } catch {
+            print("Firestore check failed: \(error.localizedDescription)")
+            await MainActor.run { self.hasUserData = false }
+        }
+    }
+
+    func getBundleWithRetry(retries: Int = 5) async throws -> TonightBundle {
+        for i in 0..<retries {
+            do {
+                print("🔄 Attempting to fetch bundle (Try \(i + 1))...")
+                return try await getBundle()
+            } catch {
+                // If it's a 404, wait 3 seconds and try again
+                if i < retries - 1 {
+                    print("⏳ Data not ready yet, waiting 3 seconds...")
+                    try? await Task.sleep(nanoseconds: 3 * 1_000_000_000)
+                } else {
+                    throw error
+                }
+            }
+        }
+        throw APIError.serverError(404, "User folder never created")
     }
 }
