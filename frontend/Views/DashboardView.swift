@@ -7,6 +7,7 @@ struct DashboardView: View {
     @State private var error: String?
     @State private var showNapSheet = false
     @State private var todayNap: NapStatus?
+    @State private var showResetConfirm = false
 
     var body: some View {
         ScrollView {
@@ -73,10 +74,16 @@ struct DashboardView: View {
                         .font(.system(size: 18))
                         .foregroundColor(Color(hex: "286EF1"))
                 }
-                Button(action: { api.clearUser() }) {
+                Button(action: { showResetConfirm = true }) {
                     Image(systemName: "person.badge.minus")
                         .font(.system(size: 18))
                         .foregroundColor(Color(hex: "ADB5BD"))
+                }
+                .alert("Reset & Upload New Data?", isPresented: $showResetConfirm) {
+                    Button("Cancel", role: .cancel) { }
+                    Button("Reset", role: .destructive) { api.clearUser() }
+                } message: {
+                    Text("This will clear your current session. You'll need to upload a new Health export to continue.")
                 }
             }
         }
