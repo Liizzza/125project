@@ -184,7 +184,7 @@ def generate_bed_candidates(now_min, wake_min, desired_sleep_min):
 
 def circadian_penalty(bed_min: int) -> float:
     """
-    Penalize bedtimes outside the healthy 9 PM – 2 AM window.
+    Penalize bedtimes outside the healthy 9 PM  2 AM window.
     Sleeping at 6 AM or 4 PM gets penalized even if sleep opportunity is fine.
     """
     # Normalize to "clock hour" for circadian check

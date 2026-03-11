@@ -192,16 +192,19 @@ class SleepAPIManager {
     static let BASE_URL = "http://10.10.231.93:8000"
 
     var userId: String? {
-        didSet { UserDefaults.standard.set(userId, forKey: "sleep_user_id") }
+        didSet {
+            hasUser = userId != nil
+            UserDefaults.standard.set(userId, forKey: "sleep_user_id")
+        }
     }
+    var hasUser: Bool = false
     var isLoading = false
     var errorMessage: String?
 
     init() {
         self.userId = UserDefaults.standard.string(forKey: "sleep_user_id")
+        self.hasUser = userId != nil
     }
-
-    var hasUser: Bool { userId != nil }
 
     private func request<T: Decodable>(path: String, method: String = "GET", body: Data? = nil) async throws -> T {
         guard let url = URL(string: Self.BASE_URL + path) else { throw APIError.invalidURL }
@@ -291,6 +294,7 @@ class SleepAPIManager {
 
     func clearUser() {
         userId = nil
+        hasUser = false
         UserDefaults.standard.removeObject(forKey: "sleep_user_id")
     }
 }

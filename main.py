@@ -151,6 +151,18 @@ def enrich_bundle(data: dict, user_id: str) -> dict:
         if "stage_b" in stages:
             stages["stage_b"]["label"] = "Lights Out"
             stages["stage_b"]["window"] = stage_b_window
+            
+        stage_b = stages.get("stage_b", {})
+        recs_b = stage_b.get("recommendations", [])
+        if len(recs_b) < 3:
+            recs_a = stages.get("stage_a", {}).get("recommendations", [])
+            gentle = [r for r in recs_a
+                      if r.get("durationMin", 99) <= 12
+                      and r.get("intensity", 1.0) <= 0.20]
+            if len(gentle) < 3:
+                gentle = sorted(recs_a, key=lambda r: r.get("intensity", 1.0))[:5]
+            if "stage_b" in stages:
+                stages["stage_b"]["recommendations"] = gentle
 
     data["user_id"] = user_id
     return data
