@@ -156,35 +156,35 @@ def process_extraction_task(user_id: str, zip_path: Path):
     try:
         def recursive_unzip(current_zip_path, target_output_path):
             with zipfile.ZipFile(current_zip_path, 'r') as z:
-                # Find the largest .xml that isn't Mac junk
                 candidates = [f for f in z.namelist() 
-                             if f.lower().endswith(".xml") 
-                             and not os.path.basename(f).startswith('.')
-                             and "__macosx" not in f.lower()]
-                time.sleep(2)
+                            if f.lower().endswith(".xml") 
+                            and not os.path.basename(f).startswith('.')
+                            and "__macosx" not in f.lower()]
                 
                 if not candidates:
                     return False
                 
-                # Pick the most likely real data
                 best_candidate = max(candidates, key=lambda x: z.getinfo(x).file_size)
                 
                 with z.open(best_candidate) as source, open(target_output_path, "wb") as target:
                     shutil.copyfileobj(source, target)
                 
-                # NOW CHECK: Did we just extract ANOTHER zip?
+                # Check if what we just extracted is ANOTHER zip
                 with open(target_output_path, "rb") as check_f:
                     header = check_f.read(4)
                     if header == b"PK\x03\x04":
-                        print(f"🔄 Nested ZIP detected in {best_candidate}! Unzipping again...")
-                        # Recursively handle this new zip
-                        nested_temp = target_output_path.with_suffix(".nested.zip")
+                        print(f"🔄 Nested ZIP detected in {best_candidate}!")
+                        # Create a unique temp name for the nested zip
+                        nested_temp = target_output_path.parent / f"temp_{uuid.uuid4()}.zip"
                         target_output_path.rename(nested_temp)
+                        
                         success = recursive_unzip(nested_temp, target_output_path)
-                        nested_temp.unlink()
+                        
+                        # SAFE DELETE: Only delete if it still exists
+                        if nested_temp.exists():
+                            nested_temp.unlink()
                         return success
                 return True
-
         # Start the process
         if recursive_unzip(zip_path, temp_files["export_xml"]):
             print(f"📦 Final XML successfully prepared for {user_id}")
